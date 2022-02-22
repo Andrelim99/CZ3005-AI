@@ -1,4 +1,5 @@
 
+from importlib.resources import path
 import json
 
 import heapq
@@ -7,83 +8,64 @@ import heapq
 START = 1
 DESTINATION = 50
 NUMNODES = 264346
-BUDGET = 287932
+BUDGET = 287932000
 MINDIST = float('inf') 
 I = 0
 # 287932
 
 
 def UCS(adjList, eCost, dist, start, destination): # Using UCS
-    energyCost = 0
+    # pq - Total Distance, Energy, Path, node cost
+    pq = []
+    heapq.heappush(pq, [0, 0, [start], {1:0}])
     
-    # Parent Node
-    pi = []
-    # Travel costs
-    curPathCosts = []
-    # prePathCosts = []
-    # Unvisited nodes
-    frontier = []
-    visited = []
-    # Removed Edges
-    removedEdges = []   
 
-    # initialise arrays
-    for i in range(NUMNODES+1):
-        pi.append([-1])
-        visited.append(0)
-        curPathCosts.append([float('inf')])
-        # prePathCosts.append(float('inf'))
+    while len(pq) != 0:
+        # Get min
+        cur = heapq.heappop(pq)
+        print(cur[:3])
+        
+        # If destination found, return this list
+        if cur[2][-1] == destination:
+            return cur
 
-
-    heapq.heappush(frontier, (0, 1))
-    curPathCosts[start] = [0]
-    # prePathCosts[start] = 0
-
-
-    while len(frontier) != 0:
-        # Get node with shortest distance in frontier
-        currentNode = heapq.heappop(frontier)[1]
-
-        # mark currentNode as visited
-        visited[currentNode] = 1
-
-        if currentNode is not start:
-            energyCost = energyCost + eCost[str(pi[currentNode][-1])+","+str(currentNode)]
-
-        if energyCost > BUDGET:
-            # Backtrack
-            energyCost = energyCost - eCost[str(pi[currentNode][-1]) +","+str(currentNode)]
-            removedEdges.append((pi[currentNode][-1], currentNode))
-            pi[currentNode].pop()
-            curPathCosts[currentNode].pop()
-            visited[currentNode] = 0
-
-        # Check if Destination Node
-        elif currentNode == destination:
-            cur = destination
-            pre = {}
-            while cur != start:
-                print(type(pi[cur][-1]))
-                print(pi[cur][-1])
-                pre[cur] = pi[cur][-1]
-                cur = pi[cur][-1]
-            return {"path": pre, "distance": curPathCosts[destination], "energy": energyCost}
-
-
-        else:
-        # For adjacent nodes
-            for neighbour in adjList[str(currentNode)]:
-                # Check if this is the link that has been removed
-                if  (currentNode,int(neighbour)) in removedEdges:
-                    continue        
-                elif visited[int(neighbour)] == 0:
-                    if curPathCosts[int(neighbour)][-1] > int(dist[str(currentNode) + "," + str(neighbour)]) + curPathCosts[currentNode][-1]:
-                        curPathCosts[int(neighbour)].append(int(dist[str(currentNode) + "," + str(neighbour)]) + curPathCosts[currentNode][-1])
-                        heapq.heappush(frontier, (curPathCosts[int(neighbour)][-1],int(neighbour)))
-                        pi[int(neighbour)].append(currentNode)
+        # Push all neighbours provided they do not exceed energy cost 
+        for neighbour in adjList[str(cur[2][-1])]:
+            # If Energy budget not exceeded, push
+            
+            newEnergy = cur[1] + eCost[str(cur[2][-1]) + "," + neighbour]
+            newDist = cur[0] + dist[str(cur[2][-1]) + "," + neighbour]
+            if newEnergy < BUDGET:
+                if int(neighbour) not in cur[2]:
+                    try:
+                        # Only add this new path if the distance to neighbour node is less than current distance to get there from another node
+                        if cur[3][int(neighbour)] > newDist:
+                            # print(cur[:3])
+                            # print(f"Cur node: {cur[2][-1]}")
+                            # print(f"Neighbour: {neighbour}")
+                            # print(f"New Dist: {newDist}")
+                            # print(f"Old Dist: {cur[3][int(neighbour)]}")
+                            
+                            newDict = cur[3].copy()
+                            newDict[int(neighbour)] = newDist                                    
+                            newPath = cur[2].copy()
+                            newPath.append(int(neighbour))
+                            heapq.heappush(pq, [newDist, newEnergy, newPath, newDict])
+                            
+                        
                         
 
-    return {"path": None, "distance": -1, "energy": -1}
+                    except:
+                        # cur[3][int(neighbour)] = newDist
+                        newDict = cur[3].copy()
+                        newDict[int(neighbour)] = newDist 
+                        newPath = cur[2].copy()
+                        newPath.append(int(neighbour))
+                        heapq.heappush(pq, [newDist, newEnergy, newPath, newDict])
+
+               
+                
+
 
 
 
@@ -103,22 +85,13 @@ with open("C:\\Users\\Andre\\Desktop\\Git\\CZ3005-AI\\Lab1\\Dist.json") as f1, o
 # Currently swapped position of distance and energy json in parameters
 result =  UCS(G, cost, distDict, 1, 50)
 
-print(result)
+
+# print(dict[1])
+print(f"Path: {result[2]}")
+print(f"Distance: {result[0]}")
+print(f"Energy: {result[1]}")
 
 
 
 
-
-# iterate through paths to find energy and distance
-# print(paths)
-# print("Shortest Path: ", end='')
-# for node in paths[0][0]:
-#     if node != DESTINATION:
-#         print(str(node)+"->", end='')
-#     else:
-#         print(node)
-# print(f"Shortest distance: {paths[0][2]} ")
-# print(f"Total Energy Cost: {paths[0][1]}")
-
-   
 
