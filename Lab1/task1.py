@@ -52,7 +52,9 @@ def UCS(adjList, eCost, dist, start, destination): # Using UCS
 
 
 # Load Relevant Files
-with open("C:\\Users\\Andre\\Desktop\\Git\\CZ3005-AI\\Lab1\\Dist.json") as f1, open("C:\\Users\\Andre\\Desktop\\Git\\CZ3005-AI\\Lab1\\G.json") as f2, open("C:\\Users\\Andre\\Desktop\\Git\\CZ3005-AI\\Lab1\\Cost.json")  as f3:
+with open("./Dist.json") as f1, \
+        open("./G.json") as f2, \
+        open("./Cost.json")  as f3:
         distDict = json.load(f1)
         G = json.load(f2)
         cost = json.load(f3)
