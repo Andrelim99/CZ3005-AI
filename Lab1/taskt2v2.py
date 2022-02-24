@@ -2,6 +2,11 @@ import json
 
 import heapq
 
+import sys
+import os
+
+os.chdir(os.path.dirname(sys.argv[0]))
+
 # Declare s & t
 START = 1
 DESTINATION = 50
@@ -68,7 +73,7 @@ def UCS(adjList, eCost, dist, start, destination): # Using UCS
 
 
 # Load Relevant Files
-with open("./Dist.json") as f1, \
+with open("Dist.json") as f1, \
         open("./G.json") as f2, \
         open("./Cost.json")  as f3:
         distDict = json.load(f1)
@@ -101,16 +106,26 @@ else:
     pathEnergy = 0
     pathDistance = 0
     for i in range(len(path)):
-        print(path[i], end='->')
-        # pathEnergy += cost[str(path[i]) + "," + str(path[i+1])]
-        # pathDistance += distDict[str(path[i]) + "," + str(path[i+1])]
+        if path[i] != DESTINATION:
+            print(path[i], end='->')
+            # print(f"Traveling from {path[i]} to {path[i+1]}")
+            # if path[i]==987 or path[i] == 986:
+            # print(f"Cost to travel to {path[i]} = {pathDistance}")
+
+            # pathEnergy += cost[str(path[i]) + "," + str(path[i+1])]
+            # pathDistance += distDict[str(path[i]) + "," + str(path[i+1])]
+
+
+        else:
+            print(path[i])
+        
 
 
 
     print()
     # print(f"Path Energy Cost: {pathEnergy}")
     # print(f"Path Total Distance: {pathDistance}")
-
-    print(f"Energy Cost: {energy}")
-    print(f"Total Distance: {distance}")
+    print(f"Shortest Distance: {distance}")
+    print(f"Total Energy: {energy}")
+    
 
