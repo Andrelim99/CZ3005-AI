@@ -36,6 +36,7 @@ def AStar(adjList, eCost, dist, start, destination, coords):  # Using A*
             if euclDist(x,y) > v:
                 print("Invalid metric! Key: ", k, " Value: ", v)
 
+    Verify()
     heapq.heappush(pq, (0, (start, 0)))  # Push (distancec, (node, energyCost))
 
     # Explore Queue
