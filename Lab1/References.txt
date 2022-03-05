@@ -1,1 +1,15 @@
 References:
+Opening Files:
+https://www.kite.com/python/answers/how-to-open-multiple-files-using-with-in-python#:~:text=Use%20open()%20to%20open,files%20at%20the%20same%20time.
+
+Loading Json:
+https://www.geeksforgeeks.org/read-json-file-using-python/
+
+Recursive DFS:
+https://www.baeldung.com/cs/simple-paths-between-two-vertices
+
+BFS:
+https://www.geeksforgeeks.org/print-paths-given-source-destination-using-bfs/
+
+UCS and Astar:
+NTU CZ1115 Lab 7
