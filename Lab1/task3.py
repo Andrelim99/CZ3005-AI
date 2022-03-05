@@ -1,6 +1,10 @@
 import json
 import math
 import heapq
+import sys
+import os
+
+os.chdir(os.path.dirname(sys.argv[0]))
 
 # Declare s & t
 START = 1
@@ -19,30 +23,22 @@ def AStar(adjList, eCost, dist, start, destination, coords):  # Using A*
     pq = []
     # energyDict = {(start,0): 0}
     minCost = {}
-    minDist = {}
+    minDist = {} # Distance + Heuristic
     visited = []
     parent = {}
 
-    # Euclidean distance
-    def euclDist(node1, node2):
+    # Euclidean distance to destination
+    def distanceToDest(node1, destination = DESTINATION):
         x1, y1 = coords[node1]
-        x2, y2 = coords[node2]
+        x2, y2 = coords[str(destination)]
         return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
 
-    # Ensure A* Heuristic is consistent
-    def Verify():
-        for k,v in dist.items():
-            x, y = k.split(",")
-            if euclDist(x,y) > v:
-                print("Invalid metric! Key: ", k, " Value: ", v)
-
-    Verify()
-    heapq.heappush(pq, (0, (start, 0)))  # Push (distancec, (node, energyCost))
+    heapq.heappush(pq, (0, 0, (start, 0)))  # Push (distancec, (node, energyCost))
 
     # Explore Queue
     while len(pq) != 0:
-        curDist, (curNode, curCost) = heapq.heappop(pq)
-        # print(f"Now visiting {curNode}, {curCost}.")
+        curPrority, curDist, (curNode, curCost) = heapq.heappop(pq)
+
         # Do not explore node if it's current distance to this node AND energy to this node are both > previous minimum
         if curNode in minDist and minDist[curNode] <= curDist and curNode in minCost and minCost[curNode] <= curCost:
             continue
@@ -70,6 +66,8 @@ def AStar(adjList, eCost, dist, start, destination, coords):  # Using A*
             neighbour = int(neighbour)
             newCost = curCost + eCost[str(curNode) + "," + str(neighbour)]
             newDist = curDist + dist[str(curNode) + "," + str(neighbour)]
+            # New Priority based on euclDist + current distance
+            priority = newDist + distanceToDest(str(neighbour))
 
             # Find energy cost to visit this node and only add if < budget
             if newCost <= BUDGET:
@@ -78,7 +76,7 @@ def AStar(adjList, eCost, dist, start, destination, coords):  # Using A*
                     # Update arrays
                     parent[(neighbour, newCost, newDist)] = (curNode, curCost, curDist)
                     # energyDict[(neighbour, newCost)]
-                    heapq.heappush(pq, (newDist, (neighbour, newCost)))
+                    heapq.heappush(pq, (priority, newDist, (neighbour, newCost)))
 
     return None, None, None
 
@@ -104,27 +102,22 @@ if parent is None:
     print("Path not found")
 
 else:
-
     cur = parent[DESTINATION, energy, distance]
-
     path = [DESTINATION]
     while cur[0] != START:
         path.insert(0, cur[0])
         cur = parent[cur]
-
     path.insert(0, START)
-
     pathEnergy = 0
     pathDistance = 0
+    print("Shortest Path: ", end='')
     for i in range(len(path)):
-        print(path[i], end='->')
-        # pathEnergy += cost[str(path[i]) + "," + str(path[i+1])]
-        # pathDistance += distDict[str(path[i]) + "," + str(path[i+1])]
-
+        if path[i] != DESTINATION:
+            print(path[i], end='->')
+        else:
+            print(path[i])
     print()
-    # print(f"Path Energy Cost: {pathEnergy}")
-    # print(f"Path Total Distance: {pathDistance}")
-
-    print(f"Energy Cost: {energy}")
-    print(f"Total Distance: {distance}")
+    print(f"Shortest Distance: {distance}")
+    print(f"Total Energy: {energy}")
+    
 
