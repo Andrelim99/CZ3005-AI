@@ -64,7 +64,6 @@ def UCS2(adjList, eCost, dist, start, destination, coords): # Using UCS
     pq = []
     # energyDict = {(start,0): 0}
     minCost = {}
-    minDist = {}
     visited = []
     parent = {}
 
@@ -75,15 +74,9 @@ def UCS2(adjList, eCost, dist, start, destination, coords): # Using UCS
         curDist, (curNode, curCost) = heapq.heappop(pq)
         # print(f"Now visiting {curNode}, {curCost}.")
     # Do not explore node if it's current distance to this node AND energy to this node are both > previous minimum
-        if curNode in minDist and minDist[curNode] <= curDist and curNode in minCost and minCost[curNode] <= curCost:
+        if curNode in minCost and minCost[curNode] <= curCost:
             continue
-    # Update new min values
-        try:
-            if curDist < minDist[curNode]:
-                minDist[curNode] = curDist
-        except:
-            minDist[curNode] = curDist 
-
+    # Update new min value
         try:
             if curCost < minCost[curNode]:
                 minCost[curNode] = curCost
@@ -119,7 +112,6 @@ def AStar(adjList, eCost, dist, start, destination, coords):  # Using A*
     pq = []
     # energyDict = {(start,0): 0}
     minCost = {}
-    minDist = {} # Distance + Heuristic
     visited = []
     parent = {}
 
@@ -136,15 +128,9 @@ def AStar(adjList, eCost, dist, start, destination, coords):  # Using A*
         curPrority, curDist, (curNode, curCost) = heapq.heappop(pq)
 
         # Do not explore node if it's current distance to this node AND energy to this node are both > previous minimum
-        if curNode in minDist and minDist[curNode] <= curDist and curNode in minCost and minCost[curNode] <= curCost:
+        if curNode in minCost and minCost[curNode] <= curCost:
             continue
-        # Update new min values
-        try:
-            if curDist < minDist[curNode]:
-                minDist[curNode] = curDist
-        except:
-            minDist[curNode] = curDist
-
+        # Update new min value
         try:
             if curCost < minCost[curNode]:
                 minCost[curNode] = curCost
