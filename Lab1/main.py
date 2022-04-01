@@ -4,6 +4,7 @@ import math
 import heapq
 import sys
 import os
+import time
 
 os.chdir(os.path.dirname(sys.argv[0]))
 
@@ -224,10 +225,18 @@ funcs = [UCS, UCS2, AStar]
 i = 0
 # Initialise all arrays
 for func in funcs:
+    start = time.perf_counter_ns()
+
     print("*" * 50)
     print(f"{tasks[i]}")
     print("*" * 50)
     parent, energy, distance = func(G, cost, distDict, START, DESTINATION, coord)
     printResults(parent, energy, distance)
+
+    end = time.perf_counter_ns()
+    print(f"Time for {tasks[i]}: {end - start} \n")
+
     i += 1
+
+
     
