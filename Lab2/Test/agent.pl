@@ -8,7 +8,7 @@ reborn:-
     retractall(glitter(_, _)),
     retractall(stench(_, _)),
     retractall(safe(_, _)),
-    current(0, 0, rnorth).
+    assert(current(0, 0, rnorth)).
 
 % move(A, L)
 % A = {shoot,moveforward,turnleft,turnright,pickup}
@@ -22,6 +22,8 @@ move(pickup, [_,_,_, on|_]).
 % Turn right
 
 % Shoot
+move(shoot, L) :-
+    assert(shot())
 
 % Move forward if space is (maybe) safe
 move(forward, L):-
