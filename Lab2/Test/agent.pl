@@ -8,7 +8,6 @@ reborn:-
     retractall(glitter(_, _)),
     retractall(stench(_, _)),
     retractall(safe(_, _)),
-    assert(hasarrow),
     current(0, 0, rnorth).
 
 % move(A, L)
