@@ -1,84 +1,127 @@
 from pyswip import Prolog
 # import pyswip
 
-
-
 prolog = Prolog()
 
-prolog.consult("test2.pl")
+prolog.consult("Agent.pl")
 
-# Boolean data
-# c = bool(list(prolog.query("boy(a)")))
+# Reborn to reset agent
+def reborn():
+    list(prolog.query("reborn"))
 
-# Dictionary Data 
-# c = list(prolog.query("boy(a)"))
-
-# c = list(prolog.query("move(What, [no, no, no, on, no, no, no])"))
-
-
-# Confounded, Stench, Tingle, Glitter, Bump, Scream.
-# c = bool(list(prolog.query("gameStart(true)")))
-# print()
-# print(c)
-
-prolog.query("reborn")
-sense = ['off', 'off', 'off', 'on', 'off', 'off', 'off']
-# c = bool(list(prolog.query("fired(false)")))
-# print()
-# print(c)
-
-
-# Test Shooting
-def testShooting():
-    c = bool(list(prolog.query(f"hasarrow")))
+def localisation():
+    # Confunded
+    c = list(prolog.query(f"confounded(What)"))
     print()
-    print("Has Arrow?", c)
+    print("Confounded: ", c)
 
-
-    c = bool(list(prolog.query(f"move(shoot, {sense})")))
+    # Stench
+    c = list(prolog.query(f"stench(X, Y)"))
     print()
-    print("Can fire?", c)
+    print("Stench at: ", c)
 
-    c = bool(list(prolog.query(f"move(shoot, {sense})")))
+    # Tingle
+    c = list(prolog.query(f"tingle(X, Y)"))
     print()
-    print("Can fire again?", c)
+    print("Tingle at: ", c)
 
-def testPickup():
-    # Test Pick up coins
-    c = bool(list(prolog.query(f"hasCoin")))
+    # Glitter
+    c = list(prolog.query(f"glitter(X, Y)"))
     print()
-    print("Has Coin?", c)
+    print("Glitter at: ", c)
 
-
-    c = bool(list(prolog.query(f"move(pickup, {sense})")))
+    # Bump
+    c = list(prolog.query(f"is_wall(X, Y)"))
     print()
-    print("Should Pick Coin?", c)
+    print("Wall at: ", c)
 
-    c = bool(list(prolog.query(f"move(pickup, {sense})")))
+    # Scream
+    c = list(prolog.query(f"wumpus_dead(What)"))
     print()
-    print("Can pick coin again?", c)
+    print("Wumpus dead: ", c)
 
 
-def testMoveforward():
-    c = list(prolog.query(f"current(WhatX, WhatY, WhatDir)"))
-    print()
-    print("Current Position: ", c)
+# Move Forward
+def move_forward():
+    print("\nMoving Forward")
+    c = list(prolog.query("moveforward([off, off, off, off, off, off])"))
 
-    list(prolog.query("move(moveforward, [off, off, off, off])"))       
-    # print()
-    # print("IN?", c)
-    # prolog.query("move(moveforward, [on, off, off, off])")
+def turn_left():
+    print("\nTurning Left")
+    c = list(prolog.query("turnleft"))
 
-    c = list(prolog.query(f"stench(WhatX, WhatY)"))
-    print()
-    print("Stench Solution?", c)
-
-    c = list(prolog.query(f"tingle(WhatX, WhatY)"))
-    print()
-    print("Tingle Solution?", c)
+def turn_right():
+    print("\nTurning Right")
+    c = list(prolog.query("turnright"))
 
 
+def test_hasarrow():
+    c = bool(list(prolog.query("hasarrow")))
+    print("\nHas arrow: ", c)
 
+
+def shoot():
+    c = bool(list(prolog.query("shoot")))
+    if(c):
+        print("Shot arrow!")
+    else:
+        print("Cannot shoot!")
+
+def current():
+    c = list(prolog.query("current(X, Y, Dir)"))
+    print("\nCurrent Position: ", c)
+
+
+def visited():
+     c = list(prolog.query("visited(X, Y)"))
+     print("\nVisited Cells: ", c)
+
+def safe():
+    c = list(prolog.query("safe(X, Y)"))
+    print("\nSafe Cells: ", c)
+
+def move(A, L):
+    list(prolog.query(f"move({A}, {L})"))
+
+def reposition(L):
+    list(prolog.query(f"reposition({L})"))
+
+reborn()
 # testShooting()
 # testPickup()
-testMoveforward()
+# test_hasarrow()
+# shoot()
+# test_hasarrow()
+# shoot()
+# testMoveForward()
+current()
+visited()
+move_forward()
+current()
+turn_right()
+current()
+move_forward()
+current()
+move_forward()
+current()
+turn_left()
+current()
+
+move("moveforward", ["off", "off", "off", "off", "off", "off"])
+visited()
+# safe()
+move("moveforward", ["off", "on", "off", "off", "off", "off"])
+visited()
+safe()
+
+move("moveforward", ["on", "off", "off", "off", "off", "off"])
+
+print("After confounded")
+reposition(["on", "on", "on", "on", "off", "off"])
+
+visited()
+safe()
+
+localisation()
+
+
