@@ -64,7 +64,8 @@ def testMoveforward():
     print()
     print("Current Position: ", c)
 
-    list(prolog.query("move(moveforward, [on, on, off, off])"))        # print()
+    list(prolog.query("move(moveforward, [off, off, off, off])"))       
+    # print()
     # print("IN?", c)
     # prolog.query("move(moveforward, [on, off, off, off])")
 

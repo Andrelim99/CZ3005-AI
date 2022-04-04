@@ -5,7 +5,8 @@ current/3,
 reborn/0,
 gameStart/1,
 stench/2,
-tingle/2.
+tingle/2,
+percept/3.
 
 
 gameStart(true).
@@ -102,10 +103,18 @@ move(A, L) :-
 
 
 % Percept Confundus
-percept(Y, X, [C, S|_]) :-
+percept(Y, X, [T, S|_]) :-
     % Tingle?
-    (C == on -> (assert(tingle(Y, X)));
-    (S == on -> (assert(stench(Y, X)))).
+    (T == on, (assert(tingle(Y, X))));
+    % Stench?
+    (S == on, (assert(stench(Y, X)))). 
+    
+
+
+% percept(Y, X, [_, S|_]) :-
+% % Tingle?
+%     % (C == on -> (assert(tingle(Y, X))));
+%     (S == on -> (assert(stench(Y, X)))).
     
 
 current(3, 3, rsouth).
