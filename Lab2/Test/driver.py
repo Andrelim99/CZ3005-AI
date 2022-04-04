@@ -17,15 +17,15 @@ prolog.consult("test2.pl")
 
 
 # Confounded, Stench, Tingle, Glitter, Bump, Scream.
-c = bool(list(prolog.query("gameStart(true)")))
-print()
-print(c)
+# c = bool(list(prolog.query("gameStart(true)")))
+# print()
+# print(c)
 
 prolog.query("reborn")
 sense = ['off', 'off', 'off', 'on', 'off', 'off', 'off']
-c = bool(list(prolog.query("fired(false)")))
-print()
-print(c)
+# c = bool(list(prolog.query("fired(false)")))
+# print()
+# print(c)
 
 
 # Test Shooting
@@ -58,5 +58,26 @@ def testPickup():
     print()
     print("Can pick coin again?", c)
 
-testShooting()
+
+def testMoveforward():
+    c = list(prolog.query(f"current(WhatX, WhatY, WhatDir)"))
+    print()
+    print("Current Position: ", c)
+
+    list(prolog.query("move(moveforward, [on, on, off, off])"))        # print()
+    # print("IN?", c)
+    # prolog.query("move(moveforward, [on, off, off, off])")
+
+    c = list(prolog.query(f"stench(WhatX, WhatY)"))
+    print()
+    print("Stench Solution?", c)
+
+    c = list(prolog.query(f"tingle(WhatX, WhatY)"))
+    print()
+    print("Tingle Solution?", c)
+
+
+
+# testShooting()
 # testPickup()
+testMoveforward()
