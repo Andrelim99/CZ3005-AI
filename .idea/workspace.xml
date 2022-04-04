@@ -20,13 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4f2d9758-b54d-4949-939d-ad7184920ebe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Lab2/Agent.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab2/Node.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab2/Senses.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab2/index.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab2/world.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/CZ3005-AI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CZ3005-AI.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Lab2/driver.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +38,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="25Vp7UfEc4MnbTTX7HToWJ18PMC" />
   <component name="ProjectLevelVcsManager">
@@ -172,6 +171,7 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -195,52 +195,5 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="526" y="204" width="347" height="273" key="#Notifications" timestamp="1648830353642">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="526" y="204" width="347" height="273" key="#Notifications/0.0.1280.680@0.0.1280.680" timestamp="1648830353642" />
-    <state x="420" y="95" key="FileChooserDialogImpl" timestamp="1648832472184">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="420" y="95" key="FileChooserDialogImpl/0.0.1280.680@0.0.1280.680" timestamp="1648832472184" />
-    <state width="943" height="163" key="GridCell.Tab.0.bottom" timestamp="1648832219883">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="943" height="163" key="GridCell.Tab.0.bottom/0.0.1280.680@0.0.1280.680" timestamp="1648832219883" />
-    <state width="943" height="163" key="GridCell.Tab.0.center" timestamp="1648832219883">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="943" height="163" key="GridCell.Tab.0.center/0.0.1280.680@0.0.1280.680" timestamp="1648832219883" />
-    <state width="943" height="163" key="GridCell.Tab.0.left" timestamp="1648832219883">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="943" height="163" key="GridCell.Tab.0.left/0.0.1280.680@0.0.1280.680" timestamp="1648832219883" />
-    <state width="943" height="163" key="GridCell.Tab.0.right" timestamp="1648832219883">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="943" height="163" key="GridCell.Tab.0.right/0.0.1280.680@0.0.1280.680" timestamp="1648832219883" />
-    <state width="629" height="204" key="GridCell.Tab.1.bottom" timestamp="1645627499690">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="629" height="204" key="GridCell.Tab.1.bottom/0.0.1280.680@0.0.1280.680" timestamp="1645627499690" />
-    <state width="629" height="204" key="GridCell.Tab.1.center" timestamp="1645627499690">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="629" height="204" key="GridCell.Tab.1.center/0.0.1280.680@0.0.1280.680" timestamp="1645627499690" />
-    <state width="629" height="204" key="GridCell.Tab.1.left" timestamp="1645627499690">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="629" height="204" key="GridCell.Tab.1.left/0.0.1280.680@0.0.1280.680" timestamp="1645627499690" />
-    <state width="629" height="204" key="GridCell.Tab.1.right" timestamp="1645627499690">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state width="629" height="204" key="GridCell.Tab.1.right/0.0.1280.680@0.0.1280.680" timestamp="1645627499690" />
-    <state x="142" y="0" key="SettingsEditor" timestamp="1648832548885">
-      <screen x="0" y="0" width="1280" height="680" />
-    </state>
-    <state x="142" y="0" key="SettingsEditor/0.0.1280.680@0.0.1280.680" timestamp="1648832548885" />
   </component>
 </project>
