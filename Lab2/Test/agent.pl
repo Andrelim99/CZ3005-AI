@@ -12,7 +12,7 @@ wumpus_dead/1,
 moveforward/1,
 glitter/2,
 bump/2,
-is_wall/2,
+wall/2,
 has_coin/1,
 relative_position/2,
 direction/1,
@@ -36,7 +36,7 @@ reborn:-
     retractall(fired(_)),
     retractall(direction(_)),
     retractall(relative_position(_, _)),
-    retractall(is_wall(_, _)),
+    retractall(wall(_, _)),
 
 
 
@@ -61,7 +61,7 @@ reposition(L):-
         retractall(safe(_, _)),
         retractall(direction(_)),
         retractall(relative_position(_, _)),
-        retractall(is_wall(_, _)),
+        retractall(wall(_, _)),
 
         assert(direction(rnorth)),
         assert(relative_position(0, 0)),
@@ -82,17 +82,30 @@ moveforward([_, _, _, _, B|_]) :-
         ((CurDir == rwest, NewX is CurX - 1) -> assert(relative_position(NewX, CurY)))
     ), relative_position(X, Y),(\+visited(X, Y), assert(visited(X, Y))), (\+safe(X, Y), assert(safe(X, Y))).
 
+% Certain there is a wall - Not sure yet
+% moveforward(_) :-
+%     current(CurX, CurY, CurDir),    
+%     (
+%         ((CurDir == rnorth, NewY is CurY + 1), wall(CurX, NewY));
+%         % Go Relative Right
+%         ((CurDir == reast, NewX is CurX + 1), wall(NewX, CurY));
+%         % Go Relative Down
+%         ((CurDir == rsouth, NewY is CurY - 1), wall(CurX, NewY));
+%         % Go Relative Left
+%         ((CurDir == rwest, NewX is CurX - 1), wall(NewX, CurY))
+%     ).
+
 % If Bump -> Wall
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
     (
-        ((CurDir == rnorth, NewY is CurY + 1) -> assert(is_wall(CurX, NewY)));
+        ((CurDir == rnorth, NewY is CurY + 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
         % Go Relative Right
-        ((CurDir == reast, NewX is CurX + 1) -> assert(is_wall(NewX, CurY)));
+        ((CurDir == reast, NewX is CurX + 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)) , retractall(safe(NewX, CurY))));
         % Go Relative Down
-        ((CurDir == rsouth, NewY is CurY - 1) -> assert(is_wall(CurX, NewY)));
+        ((CurDir == rsouth, NewY is CurY - 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
         % Go Relative Left
-        ((CurDir == rwest, NewX is CurX - 1) -> assert(is_wall(NewX, CurY)))
+        ((CurDir == rwest, NewX is CurX - 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)), retractall(safe(NewX, CurY))))
     ).
 
 % Pick up
@@ -140,25 +153,25 @@ percept(X, Y, [C, S, T, G, B, Sc]) :-
     % Confundus?
     (C == on, (\+confounded(true), (assert(confounded(true)))));
     % Stench?
-    (S == on, (\+stench(X, Y), assert(stench(X, Y)))));
+    (S == on, (\+stench(X, Y), assert(stench(X, Y))));
     % Tingle?
-    (T == on, (\+tingle(X, Y),assert(tingle(X, Y)))));
+    (T == on, (\+tingle(X, Y),assert(tingle(X, Y))));
     % Glitter?
-    (G == on, (\+glitter(X, Y),assert(glitter(X, Y)))));
-    % Bump?
-    (B == on, (\+is_wall(X, Y), assert(is_wall(X, Y)))));
+    (G == on, (\+glitter(X, Y),assert(glitter(X, Y))));
+    % Bump? - Handled in moveforward
+    % (B == on, (\+wall(X, Y), assert(wall(X, Y)))));
     % Scream?
     (Sc == on, (\+wumpus_dead(true), assert(wumpus_dead(true)))).
 
 percept(X, Y, [_, S, T|_]) :-
-    S == off, T == off, 
+    S == off, T == off,
     (
         UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
         (
-            (\+safe(X, UpY), assert(safe(X, UpY)));
-            (\+safe(X, DownY), assert(safe(X, DownY)));
-            (\+safe(UpX, Y),assert(safe(UpX, Y)));
-            (\+safe(DownX, Y),assert(safe(DownX, Y)))
+            (\+wall(X, UpY), \+safe(X, UpY), assert(safe(X, UpY)));
+            (\+wall(X, DownY), \+safe(X, DownY), assert(safe(X, DownY)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), assert(safe(UpX, Y)));
+            (\+wall(DownX, Y), \+safe(DownX, Y), assert(safe(DownX, Y)))
         )
     ).
     
