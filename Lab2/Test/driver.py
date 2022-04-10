@@ -134,7 +134,7 @@ first_start = 0
 
 # offsets to account for relative positioning
 xOffset = 1
-yOffset = 1
+yOffset = -1
 flipped = False
 
 
@@ -382,9 +382,9 @@ def pretend_moveforward():
 
 def get_abs_coord(relativeXY):
     if not flipped:
-        return spawnY + yOffset*relativeXY[0], spawnX + relativeXY[1]
+        return spawnY + yOffset*relativeXY[0], spawnX - yOffset*relativeXY[1]
     else:
-        return spawnY + relativeXY[1], spawnX + xOffset * relativeXY[0]
+        return spawnY + xOffset*relativeXY[1], spawnX + xOffset * relativeXY[0]
 
 def redefine_abs_coord():
     global absX, absY, rX, rY, spawnX, spawnY
@@ -430,9 +430,10 @@ def update_all():
 
 
 def controls():
-    global absDir
+    global absDir, rX, rY, rDir
     choice = 1
     while choice != 6:
+        print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
             1) Move Forward
             2) Turn Left
