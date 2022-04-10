@@ -18,7 +18,9 @@ relative_position/2,
 direction/1,
 safe/2,
 visited/2,
-reposition/1.
+reposition/1,
+wumpus/2,
+portal/2.
 
 
 
@@ -26,6 +28,7 @@ reposition/1.
 reborn:-
     retractall(visited(_, _)),
     retractall(wumpus(_, _)),
+    retractall(portal(_, _)),
     retractall(confounded(_)),
     retractall(tingle(_, _)),
     retractall(glitter(_, _)),
@@ -55,6 +58,7 @@ reposition(L):-
         retractall(visited(_, _)),
         retractall(wumpus(_, _)),
         retractall(confounded(_)),
+        retractall(portal(_, _)),
         retractall(tingle(_, _)),
         retractall(glitter(_, _)),
         retractall(stench(_, _)),
@@ -99,13 +103,17 @@ moveforward([_, _, _, _, B|_]) :-
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
     (
-        ((CurDir == rnorth, NewY is CurY + 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
+        ((CurDir == rnorth, NewY is CurY + 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY)),
+                                                retractall(visited(CurX, NewY)), retractall(wumpus(CurX, NewY), retractall(portal(CurX, NewY)))));
         % Go Relative Right
-        ((CurDir == reast, NewX is CurX + 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)) , retractall(safe(NewX, CurY))));
+        ((CurDir == reast, NewX is CurX + 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)) , retractall(safe(NewX, CurY)),
+                                                retractall(visited(NewX, CurY)), retractall(wumpus(NewX, CurY), retractall(portal(NewX, CurY)))));
         % Go Relative Down
-        ((CurDir == rsouth, NewY is CurY - 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
+        ((CurDir == rsouth, NewY is CurY - 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY)),
+                                                retractall(visited(CurX, NewY)), retractall(wumpus(CurX, NewY), retractall(portal(CurX, NewY)))));
         % Go Relative Left
-        ((CurDir == rwest, NewX is CurX - 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)), retractall(safe(NewX, CurY))))
+        ((CurDir == rwest, NewX is CurX - 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)), retractall(safe(NewX, CurY)),
+                                                retractall(visited(NewX, CurY)), retractall(wumpus(NewX, CurY), retractall(portal(NewX, CurY)))));
     ).
 
 % Pick up
@@ -174,7 +182,20 @@ percept(X, Y, [_, S, T|_]) :-
             (\+wall(DownX, Y), \+safe(DownX, Y), assert(safe(DownX, Y)))
         )
     ).
-    
+
+
+% Maybe Wumpus
+wumpus(X, Y) :-
+    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wall(X, Y), \+safe(X, Y),
+    (stench(X, UpY); stench(X, DownY); stench(UpX, Y); stench(DownX, Y)), assert(wumpus(X, Y)).
+
+% Maybe Portal
+portal(X, Y) :-
+    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wall(X, Y), \+safe(X, Y),
+    (tingle(X, UpY); tingle(X, DownY); tingle(UpX, Y); tingle(DownX, Y)), assert(portal(X, Y)).
+
+
+
 % has arrow
 hasarrow :-
     fired(false).
