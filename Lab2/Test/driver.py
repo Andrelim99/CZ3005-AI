@@ -282,14 +282,14 @@ def create_abs_map():
         for (cIndex, col) in enumerate(row):
             populate_helper(absMap, rIndex, cIndex, col)
 
-    for z in range(7):
-        for j in range(3):
-            for col in absMap[z]:
-                for i in range(3):
-                    print(col[i + j*3], end='')
-                print(' | ', end='')
-            print()
-        print('-'*35)
+    # for z in range(7):
+    #     for j in range(3):
+    #         for col in absMap[z]:
+    #             for i in range(3):
+    #                 print(col[i + j*3], end='')
+    #             print(' | ', end='')
+    #         print()
+    #     print('-'*35)
 
 def set_abs_agent_location():
     global absX, absY, absDir, agent_abs_map, senses
@@ -374,12 +374,7 @@ def print_Absolute_Map():
         print('-'*35)
 
 
-def start_wumpus():
-    reborn()
-    create_abs_map()
-    random_spawn()
-    random_direction()
-    print(f"Direction: {absDir}, X: {absX}, Y: {absY}")
+
 
 def pretend_moveforward():
     global rX, rY, rDir
@@ -406,9 +401,30 @@ def redefine_abs_coord():
     current()
     absY, absX = get_abs_coord((rY, rX))
     
+def update_current_senses():
+    global senses, absMap, absX, absY, first_start
+
+    senses = ["off", "off", "off", "off", "off", "off"] 
+    # Confounded??
+    if(first_start == 0):
+        senses[0] = 'on'
+
+    # Turn on stench
+    if(absMap[absY][absX][1] == '='):
+        senses[1] = 'on'
+    # Turn on tingle
+    if(absMap[absY][absX][2] == 'T'):
+        senses[2] = 'on'
+    # Turn on glitter
+    if(absMap[absY][absX][6] == '*'):
+        senses[3] = 'on'
+    # Turn on scream??
+    # if(absMap[newY][newX][1] == 'T'):
+    #     senses[1] = 'on'
+
 
 # Linking agent and driver functions
-def get_senses():
+def get_next_senses():
     global senses, absMap
     current()
     newY, newX = get_abs_coord(pretend_moveforward())
@@ -446,8 +462,9 @@ def update_all():
 
 
 def controls():
-    global absDir, rX, rY, rDir
+    global absDir, rX, rY, rDir, first_start
     choice = 1
+    first_start = 1
     while choice != 6:
         print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
@@ -459,35 +476,49 @@ def controls():
                 ''')
         choice = int(input("Choice: "))
         if choice == 1:
-            get_senses()
             print("Attempting to move forward...")
+            # Check if front is a wall
+            get_next_senses()            
             print(senses)
             move('moveforward', senses)
 
         elif choice == 2:
             # turn_left()
-
+            update_current_senses()
             move("turnleft", senses)
             absDir = DIRECTIONS[(DIRECTIONS.index(absDir)-1)%4]
             print("Turning Left")
         
         elif choice == 3:
             # turn_right()
+            update_current_senses()
             move("turnright", senses)
             absDir = DIRECTIONS[(DIRECTIONS.index(absDir)+1)%4]
             print("Turning Right")
         
         elif choice == 4:
+            update_current_senses()
             print("Attempting to pick up coin...")
         
         elif choice == 5:
+            update_current_senses()
             print("Attempting to shot arrow...")
 
         localisation()
         update_all()
         print_Absolute_Map()
+        
 
     # Check if entered portal or WUMPUS
+
+
+def start_wumpus():
+    reborn()
+    create_abs_map()
+    random_spawn()
+    random_direction()
+    update_current_senses()
+
 
 start_wumpus()
 print_Absolute_Map()

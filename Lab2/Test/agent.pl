@@ -156,11 +156,11 @@ move(A, L) :-
     A == pickup, pickup(L).
 
 
-move(A, _) :-
-    A == turnleft, turnleft.
+move(A, L) :-
+    A == turnleft, turnleft, percept(L).
 
 move(A, _) :-
-    A == turnright, turnright.
+    A == turnright, turnright, percept(L).
 
 % Percept Confundus
 percept([C, S, T, G, B, Sc]) :-
@@ -170,7 +170,7 @@ percept([C, S, T, G, B, Sc]) :-
     % Stench?
     (S == on, (\+stench(X, Y), assert(stench(X, Y))));
     % Tingle?
-    (T == on, (assert(tingle(X, Y))));
+    (T == on, (\+tingle(X, Y),assert(tingle(X, Y))));
     % Glitter?
     (G == on, (\+glitter(X, Y),assert(glitter(X, Y))));
     % Bump? - Handled in moveforward
