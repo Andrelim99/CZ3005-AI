@@ -9,93 +9,6 @@ prolog = Prolog()
 
 prolog.consult("Agent.pl")
 
-# AGENT FUNCTIONS
-# Reborn to reset agent
-def reborn():
-    list(prolog.query("reborn"))
-
-def localisation():
-    # Confunded
-    c = list(prolog.query(f"confounded(What)"))
-    print()
-    print("Confounded: ", c)
-
-    # Stench
-    c = list(prolog.query(f"stench(X, Y)"))
-    print()
-    print("Stench at: ", c)
-
-    # Tingle
-    c = list(prolog.query(f"tingle(X, Y)"))
-    print()
-    print("Tingle at: ", c)
-
-    # Glitter
-    c = list(prolog.query(f"glitter(X, Y)"))
-    print()
-    print("Glitter at: ", c)
-
-    # Bump
-    c = list(prolog.query(f"is_wall(X, Y)"))
-    print()
-    print("Wall at: ", c)
-
-    # Scream
-    c = list(prolog.query(f"wumpus_dead(What)"))
-    print()
-    print("Wumpus dead: ", c)
-
-
-# Move Forward
-def move_forward():
-    print("\nMoving Forward")
-    c = list(prolog.query("moveforward([off, off, off, off, off, off])"))
-
-def turn_left():
-    # print("\nTurning Left")
-    c = list(prolog.query("turnleft"))
-
-def turn_right():
-    print("\nTurning Right")
-    c = list(prolog.query("turnright"))
-
-
-def test_hasarrow():
-    c = bool(list(prolog.query("hasarrow")))
-    print("\nHas arrow: ", c)
-
-
-def shoot():
-    c = bool(list(prolog.query("shoot")))
-    if(c):
-        print("Shot arrow!")
-    else:
-        print("Cannot shoot!")
-
-def current():
-    global rX, rY, rDir
-    c = list(prolog.query("current(X, Y, Dir)"))
-    # print("\nCurrent Position: ", c[0])
-    rX = c[0]['X']
-    rY = c[0]['Y']
-    rDir = c[0]['Dir']
-
-
-
-def visited():
-     c = list(prolog.query("visited(X, Y)"))
-     print("\nVisited Cells: ", c)
-
-def safe():
-    c = list(prolog.query("safe(X, Y)"))
-    print("\nSafe Cells: ", c)
-
-def move(A, L):
-    list(prolog.query(f"move({A}, {L})"))
-
-def reposition(L):
-    list(prolog.query(f"reposition({L})"))
-
 
 
 # NEED CHANGE DEPENDING ON THE PROPER ORDER
@@ -158,13 +71,115 @@ wumpus_pos = set()
 portal_pos = set()
 wall_pos = set()
 safe_pos = set()
+visited_pos = set()
 
 
 
 senses = ["on", "off", "off", "off", "off", "off"]
 
-# DRIVER FUNCTIONS
+# AGENT FUNCTIONS
+# Reborn to reset agent
+def reborn():
+    list(prolog.query("reborn"))
 
+def localisation():
+    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
+    # Confunded
+    c = list(prolog.query(f"confounded(What)"))
+    print()
+    print("Confounded: ", c)
+
+    # Stench
+    c = list(prolog.query(f"stench(X, Y)"))
+    print()
+    print("Stench at: ", c)
+
+
+    # Tingle
+    c = list(prolog.query(f"tingle(X, Y)"))
+    print()
+    print("Tingle at: ", c)
+
+    # Glitter
+    c = list(prolog.query(f"glitter(X, Y)"))
+    print()
+    print("Glitter at: ", c)
+
+    # Bump
+    c = list(prolog.query(f"wall(X, Y)"))
+    print()
+    print("Wall at: ", c)
+
+    # Scream
+    c = list(prolog.query(f"wumpus_dead(What)"))
+    print()
+    print("Wumpus dead: ", c)
+
+
+    # Wumpus Position
+    c = list(prolog.query(f"wumpus(X, Y)"))
+    print()
+    print("Wumpus maybe at: ", c)
+
+    # Wumpus Position
+    c = list(prolog.query(f"portal(X, Y)"))
+    print()
+    print("Portal maybe at: ", c)
+
+
+
+# Move Forward
+def move_forward():
+    print("\nMoving Forward")
+    c = list(prolog.query("moveforward([off, off, off, off, off, off])"))
+
+def turn_left():
+    # print("\nTurning Left")
+    c = list(prolog.query("turnleft"))
+
+def turn_right():
+    print("\nTurning Right")
+    c = list(prolog.query("turnright"))
+
+
+def test_hasarrow():
+    c = bool(list(prolog.query("hasarrow")))
+    print("\nHas arrow: ", c)
+
+
+def shoot():
+    c = bool(list(prolog.query("shoot")))
+    if(c):
+        print("Shot arrow!")
+    else:
+        print("Cannot shoot!")
+
+def current():
+    global rX, rY, rDir
+    c = list(prolog.query("current(X, Y, Dir)"))
+    # print("\nCurrent Position: ", c[0])
+    rX = c[0]['X']
+    rY = c[0]['Y']
+    rDir = c[0]['Dir']
+
+
+
+def visited():
+     c = list(prolog.query("visited(X, Y)"))
+     print("\nVisited Cells: ", c)
+
+def safe():
+    c = list(prolog.query("safe(X, Y)"))
+    print("\nSafe Cells: ", c)
+
+def move(A, L):
+    list(prolog.query(f"move({A}, {L})"))
+
+def reposition(L):
+    list(prolog.query(f"reposition({L})"))
+
+
+# DRIVER FUNCTIONS
 # Initialisation
 
 # Get spawnable spots
@@ -429,6 +444,7 @@ def update_all():
 
 
 
+
 def controls():
     global absDir, rX, rY, rDir
     choice = 1
@@ -445,6 +461,7 @@ def controls():
         if choice == 1:
             get_senses()
             print("Attempting to move forward...")
+            print(senses)
             move('moveforward', senses)
 
         elif choice == 2:
@@ -466,6 +483,7 @@ def controls():
         elif choice == 5:
             print("Attempting to shot arrow...")
 
+        localisation()
         update_all()
         print_Absolute_Map()
 
