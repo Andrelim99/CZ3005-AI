@@ -448,12 +448,15 @@ def controls():
             move('moveforward', senses)
 
         elif choice == 2:
-            turn_left()
+            # turn_left()
+
+            move("turnleft", senses)
             absDir = DIRECTIONS[(DIRECTIONS.index(absDir)-1)%4]
             print("Turning Left")
         
         elif choice == 3:
-            turn_right()
+            # turn_right()
+            move("turnright", senses)
             absDir = DIRECTIONS[(DIRECTIONS.index(absDir)+1)%4]
             print("Turning Right")
         

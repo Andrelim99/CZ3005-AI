@@ -156,6 +156,12 @@ move(A, L) :-
     A == pickup, pickup(L).
 
 
+move(A, _) :-
+    A == turnleft, turnleft.
+
+move(A, _) :-
+    A == turnright, turnright.
+
 % Percept Confundus
 percept(X, Y, [C, S, T, G, B, Sc]) :-
     % Confundus?
