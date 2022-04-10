@@ -1,4 +1,5 @@
 
+from numpy import transpose
 from pyswip import Prolog
 # import pyswip
 
@@ -6,13 +7,14 @@ prolog = Prolog()
 
 prolog.consult("Agent.pl")
 
+# NEED CHANGE DEPENDING ON THE PROPER ORDER
 NUMROW = 7
 NUMCOL = 6
 
 ENTITIES = ['W', 'P', 'C', '#']
 
 
-# Map
+# Map - Row by Column (7 x 6)
 MAP = [
        ['#', '#', '#', '#', '#', '#'],
        ['#', '', '', '', '', '#'],
@@ -23,8 +25,17 @@ MAP = [
        ['#', '#', '#', '#', '#', '#']]
 
 
-def populate_helper(absMap, rIndex, cIndex, col):
+# MAP = transpose([
+#        ['#', '#', '#', '#', '#', '#'],
+#        ['#', '', '', '', '', '#'],
+#        ['#', 'P', '', 'P', '', '#'],
+#        ['#', 'W', '', '', 'C', '#'],
+#        ['#', '', '', '', '', '#'],
+#        ['#', 'P', '', '', '', '#'],
+#        ['#', '#', '#', '#', '#', '#']])
 
+# Symbol Populater for default map - made my own modifications
+def populate_helper(absMap, rIndex, cIndex, col):
     newRight = cIndex + 1
     newLeft = cIndex - 1
     newUp = rIndex + 1
@@ -69,8 +80,8 @@ def populate_helper(absMap, rIndex, cIndex, col):
     # Entity (again?)
     # Glitter
     elif col == "C":
-            for i in range(9):
-                absMap[rIndex][cIndex][i] = '*'       
+            # for i in range(9):
+                absMap[rIndex][cIndex][6] = '*'       
 
 
     # Scream
@@ -81,7 +92,7 @@ def populate_helper(absMap, rIndex, cIndex, col):
 
 def print_Absolute_Map():
     # Create 7 x 6 x 9 [] * 7 
-    absMap = [ [ ['.', '.', '.', '.', '.', '.', '.', '.', '.'] for b in range(6)] for a in range(7) ]
+    absMap = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW) ]
     print()
     for (rIndex, row) in enumerate(MAP):
         for (cIndex, col) in enumerate(row):
@@ -89,7 +100,7 @@ def print_Absolute_Map():
 
 
 
-
+    # Printing the default map - made my own modifications
     for z in range(7):
         for j in range(3):
             for col in absMap[z]:
