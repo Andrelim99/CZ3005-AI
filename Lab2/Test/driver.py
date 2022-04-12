@@ -220,7 +220,8 @@ def spawn_spots():
 # Spawn
 def random_spawn():
     global spawnX, spawnY, absX, absY
-    (spawnY, spawnX) = random.choice(spawn_spots())
+    # (spawnY, spawnX) = random.choice(spawn_spots())
+    spawnY, spawnX = 1, 4
     absY, absX = spawnY, spawnX
     
 
@@ -489,6 +490,7 @@ def query_agent():
     # Reset all sets:
     wumpus_pos = set()
     portal_pos = set()
+    safe_pos = set()
 
 
 
@@ -545,7 +547,7 @@ def update_all():
 def controls():
     print__map()
     print_Absolute_Map()
-    global absDir, rX, rY, rDir, first_start
+    global absDir, rX, rY, rDir, first_start, senses
     choice = 1
     first_start = 1
     while choice != 6:
@@ -563,11 +565,16 @@ def controls():
             # Check if front is a wall
             get_next_senses()            
             print(senses)
+            # print(bool(list(prolog.query(f"moveforward({senses})"))))
             move('moveforward', senses)
+            move("turnright", senses)
+            move("turnleft", senses)
             # update_current_senses()
 
         elif choice == 2:
-            # turn_left()
+            # turn_left()  
+            print(senses)
+
             update_current_senses()
             move("turnleft", senses)
             absDir = DIRECTIONS[(DIRECTIONS.index(absDir)-1)%4]

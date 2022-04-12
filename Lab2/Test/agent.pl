@@ -20,7 +20,8 @@ safe/2,
 visited/2,
 reposition/1,
 wumpus/2,
-portal/2.
+portal/2,
+update_safe/2.
 
 
 
@@ -47,8 +48,8 @@ reborn:-
     assert(fired(false)),
     assert(wumpus_dead(false)),
     assert(confounded(true)),
-    % assert(safe(0,0)),
-    % assert(visited(0,0)),
+    assert(safe(0,0)),
+    assert(visited(0,0)),
     
     assert(direction(rnorth)),
     assert(relative_position(0, 0)).
@@ -78,8 +79,8 @@ reposition(L):-
 
 
 % No wall
-moveforward([_, _, _, _, B|_]) :-
-    B == off, current(CurX, CurY, CurDir), retractall(relative_position(_, _)),    
+moveforward([_, _, _, _, B, _]) :-
+    B == off, current(CurX, CurY, CurDir), retractall(relative_position(_, _)),  
     (
         ((CurDir == rnorth, NewY is CurY + 1) -> assert(relative_position(CurX, NewY)));
         % Go Relative Right
@@ -88,7 +89,8 @@ moveforward([_, _, _, _, B|_]) :-
         ((CurDir == rsouth, NewY is CurY - 1) -> assert(relative_position(CurX, NewY)));
         % Go Relative Left
         ((CurDir == rwest, NewX is CurX - 1) -> assert(relative_position(NewX, CurY)))
-    ), relative_position(X, Y),(\+visited(X, Y), assert(visited(X, Y))), (\+safe(X, Y), assert(safe(X, Y))).
+    ),
+    relative_position(X, Y),(\+visited(X, Y), assert(visited(X, Y))), (\+safe(X, Y), assert(safe(X, Y))),(portal(X, Y) -> retract(portal(X, Y))), (wumpus(X, Y) -> retract(wumpus(X, Y))).
 
 % Certain there is a wall - Not sure yet
 % moveforward(_) :-
@@ -107,17 +109,17 @@ moveforward([_, _, _, _, B|_]) :-
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
     (
-        ((CurDir == rnorth, NewY is CurY + 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY)),
-                                                retractall(visited(CurX, NewY)), retractall(wumpus(CurX, NewY)), retractall(portal(CurX, NewY))));
+        ((CurDir == rnorth, NewY is CurY + 1) -> ( (\+wall(CurX, NewY) -> assert(wall(CurX, NewY))), (safe(CurX, NewY) -> retract(safe(CurX, NewY)) ),
+                                                (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))) ) );
         % Go Relative Right
-        ((CurDir == reast, NewX is CurX + 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)) , retractall(safe(NewX, CurY)),
-                                                retractall(visited(NewX, CurY)) , retractall(wumpus(NewX, CurY)), retractall(portal(NewX, CurY))));
+        ((CurDir == reast, NewX is CurX + 1) -> ( (\+wall(NewX, CurY) -> assert(wall(NewX, CurY))), (safe(NewX, CurY) -> retract(safe(NewX, CurY)) ),
+                                                (portal(NewX, CurY) -> retract(portal(NewX, CurY))), (wumpus(NewX, CurY), retract(wumpus(NewX, CurY))) ) );
         % Go Relative Down
-        ((CurDir == rsouth, NewY is CurY - 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY)),
-                                                retractall(visited(CurX, NewY)) , retractall(wumpus(CurX, NewY)), retractall(portal(CurX, NewY))));
+        ((CurDir == rsouth, NewY is CurY - 1) -> ( (\+wall(CurX, NewY) -> assert(wall(CurX, NewY))), (safe(CurX, NewY) -> retract(safe(CurX, NewY)) ),
+                                                (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))) ) );
         % Go Relative Left
-        ((CurDir == rwest, NewX is CurX - 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)), retractall(safe(NewX, CurY)),
-                                                retractall(visited(NewX, CurY)) , retractall(wumpus(NewX, CurY)), retractall(portal(NewX, CurY))))
+        ((CurDir == rwest, NewX is CurX - 1) ->  ( (\+wall(NewX, CurY) -> assert(wall(NewX, CurY))), (safe(NewX, CurY) -> retract(safe(NewX, CurY)) ),
+                                                (portal(NewX, CurY) -> retract(portal(NewX, CurY))), (wumpus(NewX, CurY) -> retract(wumpus(NewX, CurY))) ) )
     ).
 
 % Pick up
@@ -163,11 +165,11 @@ move(A, L) :-
 move(A, L) :-
     A == turnleft, turnleft, percept(L).
 
-move(A, _) :-
+move(A, L) :-
     A == turnright, turnright, percept(L).
 
 % Percept Confundus
-percept([C, S, T, G, B, Sc]) :-
+percept([C, S, T, G, _, Sc]) :-
     current(X, Y, CurDir), (
     % Confundus?
     (C == on, (\+confounded(true), (assert(confounded(true)))));
@@ -182,6 +184,9 @@ percept([C, S, T, G, B, Sc]) :-
     % Scream?
     (Sc == on, (\+wumpus_dead(true), assert(wumpus_dead(true))))
     ).
+
+
+
 
 percept([_, S, T|_]) :-
     current(X, Y, CurDir),
@@ -200,7 +205,7 @@ percept([_, S, T|_]) :-
 percept([_, S|_]) :-
     current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
     (
-        S == on,
+        S == on, 
         (           
             (\+wall(X, UpY), \+safe(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
             (\+wall(X, DownY), \+safe(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
@@ -210,17 +215,23 @@ percept([_, S|_]) :-
     ).
 
 percept([_, _, T|_]) :-
-    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+    current(X, Y, CurDir), UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+    
     (
         T == on,
         (
             (\+wall(X, UpY), \+safe(X, UpY), \+portal(X, UpY), assert(portal(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)));
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+portal(DownX, Y), assert(portal(DownX, Y)))
+            (\+wall(X, DownY), \+safe(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));            
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+portal(DownX, Y),  assert(portal(DownX, Y)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)))
         )
 
     ).
+
+
+
+
+
 
 % Maybe Wumpus
 % wumpus(X, Y) :-
@@ -238,7 +249,7 @@ percept([_, _, T|_]) :-
 %         \+wall(DownX, TY), \+safe(DownX, TY), assert(portal(DownX, TY));
 %         \+wall(TX, DownY), \+safe(TX, DownY), assert(portal(TX, DownY));
 %         \+wall(TX, UpY), \+safe(TX, UpY), assert(portal(TX, UpY));
-    ).
+%    ).
     % (tingle(X, UpY); tingle(X, DownY); tingle(UpX, Y); tingle(DownX, Y)), assert(portal(X, Y)).
 
 
