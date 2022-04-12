@@ -7,7 +7,7 @@ from pyswip import Prolog
 
 prolog = Prolog()
 
-prolog.consult("Agent.pl")
+prolog.consult("agent.pl")
 
 
 
@@ -82,6 +82,32 @@ senses = ["on", "off", "off", "off", "off", "off"]
 def reborn():
     list(prolog.query("reborn"))
 
+
+def stench_at():
+    return list(prolog.query(f"stench(X, Y)"))
+
+def tingle_at():
+    return list(prolog.query(f"tingle(X, Y)"))
+
+def glitter_at():
+    return list(prolog.query(f"glitter(X, Y)"))
+
+def wall_at():
+    return list(prolog.query(f"wall(X, Y)"))
+
+def wumpus_at():
+    return list(prolog.query(f"wumpus(X, Y)"))
+
+def portal_at():
+    return list(prolog.query(f"portal(X, Y)"))
+
+def visited_at():
+    return list(prolog.query(f"visited(X, Y)"))
+
+def safe_at():
+    return list(prolog.query(f"safe(X, Y)"))
+
+
 def localisation():
     global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
     # Confunded
@@ -121,7 +147,7 @@ def localisation():
     print()
     print("Wumpus maybe at: ", c)
 
-    # Wumpus Position
+    # Portal Position
     c = list(prolog.query(f"portal(X, Y)"))
     print()
     print("Portal maybe at: ", c)
@@ -191,13 +217,10 @@ def spawn_spots():
                 spawns.append((r, c))
     return spawns
 
-spawnable = spawn_spots()
-print('\n', spawnable)
-
 # Spawn
 def random_spawn():
-    global spawnable, spawnX, spawnY, absX, absY
-    (spawnY, spawnX) = random.choice(spawnable)
+    global spawnX, spawnY, absX, absY
+    (spawnY, spawnX) = random.choice(spawn_spots())
     absY, absX = spawnY, spawnX
     
 
@@ -282,14 +305,15 @@ def create_abs_map():
         for (cIndex, col) in enumerate(row):
             populate_helper(absMap, rIndex, cIndex, col)
 
-    # for z in range(7):
-    #     for j in range(3):
-    #         for col in absMap[z]:
-    #             for i in range(3):
-    #                 print(col[i + j*3], end='')
-    #             print(' | ', end='')
-    #         print()
-    #     print('-'*35)
+def print__map():
+    for z in range(7):
+        for j in range(3):
+            for col in absMap[z]:
+                for i in range(3):
+                    print(col[i + j*3], end='')
+                print(' | ', end='')
+            print()
+        print('-'*35)
 
 def set_abs_agent_location():
     global absX, absY, absDir, agent_abs_map, senses
@@ -313,7 +337,7 @@ def set_abs_agent_location():
             if(i == 0):
                 agent_abs_map[absY][absX][0] = '%'
             elif(i == 1):
-                agent_abs_map[absY][absX][1] = 'S'
+                agent_abs_map[absY][absX][1] = '='
             elif(i == 2):
                 agent_abs_map[absY][absX][2] = 'T'
             elif(i == 3):
@@ -346,6 +370,11 @@ def update_absolute_agent_map():
             agent_abs_map[y][x][4] = 'O'
 
     # Set safe/visited cells
+    for (y, x) in safe_pos:
+        agent_abs_map[y][x][4] = 's'
+    
+    for (y, x) in visited_pos:
+        agent_abs_map[y][x][4] = 'S'
 
     # Set walls
     for (y, x) in wall_pos:
@@ -403,7 +432,6 @@ def redefine_abs_coord():
     
 def update_current_senses():
     global senses, absMap, absX, absY, first_start
-
     senses = ["off", "off", "off", "off", "off", "off"] 
     # Confounded??
     if(first_start == 0):
@@ -452,16 +480,71 @@ def get_next_senses():
     # Turn on scream??
     # if(absMap[newY][newX][1] == 'T'):
     #     senses[1] = 'on'
-    
+
+
+
+# TO DO
+def query_agent():
+    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos 
+    # Reset all sets:
+    wumpus_pos = set()
+    portal_pos = set()
+
+
+
+    # print("Stench: ", stench_at())
+    for sol in stench_at():
+        stench_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("STENCH POS: ", stench_pos)
+
+    # print("Tingle: ", tingle_at())
+    for sol in tingle_at():
+        tingle_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("TINGLE POS: ", tingle_pos)
+
+    # print("Glitter: ", glitter_at())
+    for sol in glitter_at():
+        glitter_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("GLITTER POS: ", glitter_pos)
+
+    # print("Walls: ", wall_at())
+    for sol in wall_at():
+        wall_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("WALLS POS: ", wall_pos)
+
+    # print("Wumpus: ", wumpus_at())
+    for sol in wumpus_at():
+        wumpus_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("WUMPUS POS: ", wumpus_pos)
+
+    print("Portal: ", portal_at())
+    for sol in portal_at():
+        portal_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("PORTAL POS: ", portal_pos)
+
+    # print("Visited: ", visited_at())
+    for sol in visited_at():
+        visited_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("VISITED POS: ", visited_pos)
+
+    # print("Safe: ", safe_at())
+    for sol in safe_at():
+        safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("SAFE POS: ", safe_pos)
+
+
     
 def update_all():
     redefine_abs_coord()
+    query_agent()
 
 
 
 
 
 def controls():
+    print__map()
+    print_Absolute_Map()
     global absDir, rX, rY, rDir, first_start
     choice = 1
     first_start = 1
@@ -481,6 +564,7 @@ def controls():
             get_next_senses()            
             print(senses)
             move('moveforward', senses)
+            # update_current_senses()
 
         elif choice == 2:
             # turn_left()
@@ -504,9 +588,13 @@ def controls():
             update_current_senses()
             print("Attempting to shot arrow...")
 
-        localisation()
+        print("BEFORE")
         update_all()
+
+        print("AFTER")
+        print__map()
         print_Absolute_Map()
+        
         
 
     # Check if entered portal or WUMPUS
@@ -521,8 +609,10 @@ def start_wumpus():
 
 
 start_wumpus()
-print_Absolute_Map()
+
 controls()
+
+# print("WUMPUS: ", wumpus_at())
 
 
 # reborn()

@@ -47,11 +47,12 @@ reborn:-
     assert(fired(false)),
     assert(wumpus_dead(false)),
     assert(confounded(true)),
+    % assert(safe(0,0)),
+    % assert(visited(0,0)),
     
     assert(direction(rnorth)),
     assert(relative_position(0, 0)).
-    % assert(safe(0,0)),
-    % assert(visited(0,0)).
+    
     
 
 reposition(L):-
@@ -72,6 +73,9 @@ reposition(L):-
         assert(safe(0,0)),
         assert(visited(0,0)),
         percept(0,0, L).
+
+
+
 
 % No wall
 moveforward([_, _, _, _, B|_]) :-
@@ -107,13 +111,13 @@ moveforward([_, _, _, _, B|_]) :-
                                                 retractall(visited(CurX, NewY)), retractall(wumpus(CurX, NewY)), retractall(portal(CurX, NewY))));
         % Go Relative Right
         ((CurDir == reast, NewX is CurX + 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)) , retractall(safe(NewX, CurY)),
-                                                retractall(visited(NewX, CurY)), retractall(wumpus(NewX, CurY)), retractall(portal(NewX, CurY))));
+                                                retractall(visited(NewX, CurY)) , retractall(wumpus(NewX, CurY)), retractall(portal(NewX, CurY))));
         % Go Relative Down
         ((CurDir == rsouth, NewY is CurY - 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY)),
-                                                retractall(visited(CurX, NewY)), retractall(wumpus(CurX, NewY)), retractall(portal(CurX, NewY))));
+                                                retractall(visited(CurX, NewY)) , retractall(wumpus(CurX, NewY)), retractall(portal(CurX, NewY))));
         % Go Relative Left
         ((CurDir == rwest, NewX is CurX - 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)), retractall(safe(NewX, CurY)),
-                                                retractall(visited(NewX, CurY)), retractall(wumpus(NewX, CurY)), retractall(portal(NewX, CurY))))
+                                                retractall(visited(NewX, CurY)) , retractall(wumpus(NewX, CurY)), retractall(portal(NewX, CurY))))
     ).
 
 % Pick up
@@ -179,7 +183,8 @@ percept([C, S, T, G, B, Sc]) :-
     (Sc == on, (\+wumpus_dead(true), assert(wumpus_dead(true))))
     ).
 
-percept(X, Y, [_, S, T|_]) :-
+percept([_, S, T|_]) :-
+    current(X, Y, CurDir),
     S == off, T == off,
     (
         UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
@@ -192,15 +197,49 @@ percept(X, Y, [_, S, T|_]) :-
     ).
 
 
+percept([_, S|_]) :-
+    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+    (
+        S == on,
+        (           
+            (\+wall(X, UpY), \+safe(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
+            (\+wall(X, DownY), \+safe(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
+        )
+    ).
+
+percept([_, _, T|_]) :-
+    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+    (
+        T == on,
+        (
+            (\+wall(X, UpY), \+safe(X, UpY), \+portal(X, UpY), assert(portal(X, UpY)));
+            (\+wall(X, DownY), \+safe(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)));
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+portal(DownX, Y), assert(portal(DownX, Y)))
+        )
+
+    ).
+
 % Maybe Wumpus
-wumpus(X, Y) :-
-    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wall(X, Y), \+safe(X, Y),
-    (stench(X, UpY); stench(X, DownY); stench(UpX, Y); stench(DownX, Y)), assert(wumpus(X, Y)).
+% wumpus(X, Y) :-
+%     stench(X, Y) X is X+1, Y is Y + 1.
+% current(X, Y),
+%     UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wall(X, Y), \+safe(X, Y),
+%     (stench(X, UpY); stench(X, DownY); stench(UpX, Y); stench(DownX, Y)), assert(wumpus(X, Y)).
 
 % Maybe Portal
-portal(X, Y) :-
-    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wall(X, Y), \+safe(X, Y),
-    (tingle(X, UpY); tingle(X, DownY); tingle(UpX, Y); tingle(DownX, Y)), assert(portal(X, Y)).
+% portal(X, Y) :-
+%     tingle(TX, TY),
+%     (UpY is TY+1, DownY is TY-1, UpX is TX+1, DownX is TX-1),
+%     (
+%         \+wall(UpX, TY), \+safe(UpX, TY), assert(portal(UpX, TY));
+%         \+wall(DownX, TY), \+safe(DownX, TY), assert(portal(DownX, TY));
+%         \+wall(TX, DownY), \+safe(TX, DownY), assert(portal(TX, DownY));
+%         \+wall(TX, UpY), \+safe(TX, UpY), assert(portal(TX, UpY));
+    ).
+    % (tingle(X, UpY); tingle(X, DownY); tingle(UpX, Y); tingle(DownX, Y)), assert(portal(X, Y)).
 
 
 
@@ -210,9 +249,6 @@ hasarrow :-
 
 current(X, Y, Dir) :-
     relative_position(X, Y), direction(Dir).
-
-
-
 
 
 
