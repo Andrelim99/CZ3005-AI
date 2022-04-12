@@ -20,10 +20,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4f2d9758-b54d-4949-939d-ad7184920ebe" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.name" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.name" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/CZ3005-AI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/CZ3005-AI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lab2/Test/agent.pl" beforeDir="false" afterPath="$PROJECT_DIR$/Lab2/Test/agent.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lab2/Test/driver.py" beforeDir="false" afterPath="$PROJECT_DIR$/Lab2/Test/driver.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,7 +53,13 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../CZ2006-GoWhereEat" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\NEW-USER\Documents\CZ3005-AI\Lab2\Test" />
+    </key>
   </component>
   <component name="RunManager" selected="Python.driver2">
     <configuration name="Senses" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
@@ -163,6 +168,7 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.driver" />
       <item itemvalue="Python.driver2" />
       <item itemvalue="Python.main" />
       <item itemvalue="Python.Senses" />

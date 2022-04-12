@@ -34,7 +34,7 @@ MAP = [
 #        ['#', 'P', '', '', '', '#'],
 #        ['#', '#', '#', '#', '#', '#']])
 
-# Symbol Populater for default map - made my own modifications
+# Symbol Populater for default map - made my own modificati ons
 def populate_helper(absMap, rIndex, cIndex, col):
     newRight = cIndex + 1
     newLeft = cIndex - 1

@@ -99,11 +99,11 @@ moveforward([_, _, _, _, B|_]) :-
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
     (
-        ((CurDir == rnorth, NewY is CurY + 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
+        ((CurDir == rnorth, NewY is CurY + 1) -> (\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
         % Go Relative Right
         ((CurDir == reast, NewX is CurX + 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)) , retractall(safe(NewX, CurY))));
         % Go Relative Down
-        ((CurDir == rsouth, NewY is CurY - 1) ->(\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
+        ((CurDir == rsouth, NewY is CurY - 1) -> (\+wall(CurX, NewY), assert(wall(CurX, NewY)), retractall(safe(CurX, NewY))));
         % Go Relative Left
         ((CurDir == rwest, NewX is CurX - 1) -> (\+wall(NewX, CurY), assert(wall(NewX, CurY)), retractall(safe(NewX, CurY))))
     ).
@@ -182,7 +182,15 @@ hasarrow :-
 current(X, Y, Dir) :-
     relative_position(X, Y), direction(Dir).
 
-
+explore(L):-
+	current(X,Y, Dir),CurrentX = X, CurrentY = Y,
+	(
+		( glitter(CurrentX,CurrentY), L = pickup );
+		( tingle(CurrentX,CurrentY), stench(CurrentX, CurrentY), moveforward(X,Y,DirInverse,L) ); %Backtrack
+		( tingle(X,Y), moveforward(X,Y,Dir,L) );
+		( stench(X,Y), moveforward(X,Y,DirInverse,L) );
+		moveforward(X,Y,Dir,L)
+	).
 
 
 
