@@ -109,7 +109,7 @@ moveforward([_, _, _, _, B, _]) :-
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
         (
-        ((CurDir == rnorth, NewY is CurY + 1) -> (assert(relative_position(CurX, CurY))) , (safe(CurX, NewY) -> retract(safe(CurX, NewY))));
+        ((CurDir == rnorth, NewY is CurY + 1) -> relative_position(CurX, CurY));
         % Go Relative Right
         ((CurDir == reast, NewX is CurX + 1) -> assert(relative_position(CurX, CurY)));
         % Go Relative Down
@@ -119,7 +119,6 @@ moveforward([_, _, _, _, B|_]) :-
     ),
 
     (\+wall(CurX, NewY), assert(wall(CurX, NewY))), (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))).
-
 
 % Pick up
 pickup([_, _, _, G|_]) :-

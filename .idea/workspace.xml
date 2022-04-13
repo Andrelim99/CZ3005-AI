@@ -23,9 +23,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="4f2d9758-b54d-4949-939d-ad7184920ebe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Lab1/agent.pl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Lab1/driver.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lab1/agent.pl" beforeDir="false" afterPath="$PROJECT_DIR$/Lab1/agent.pl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -41,6 +40,9 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectId" id="25Vp7UfEc4MnbTTX7HToWJ18PMC" />
   <component name="ProjectLevelVcsManager">
@@ -168,11 +170,11 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="Python.Senses" />
+      <item itemvalue="Python.driver (1)" />
       <item itemvalue="Python.driver" />
       <item itemvalue="Python.main" />
-      <item itemvalue="Python.Senses" />
       <item itemvalue="Python.task3" />
-      <item itemvalue="Python.driver (1)" />
     </list>
     <recent_temporary>
       <list>
@@ -184,6 +186,7 @@
       </list>
     </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
