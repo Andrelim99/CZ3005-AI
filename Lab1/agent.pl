@@ -219,9 +219,9 @@ percept([_, S|_]) :-
         S == on, 
         (           
             (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, UpY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(X, UpY), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(X, UpY), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
+            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
         )
     ).
 
@@ -246,9 +246,9 @@ percept([_, _, T|_]) :-
         T == on,
         (
             (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_portal(X, UpY), \+portal(X, UpY), assert(portal(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_portal(X, UpY), \+portal(X, DownY), assert(portal(X, DownY)));            
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_portal(X, UpY), \+portal(DownX, Y),  assert(portal(DownX, Y)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_portal(X, UpY), \+portal(UpX, Y), assert(portal(UpX, Y)))
+            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_portal(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));            
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_portal(DownX, Y), \+portal(DownX, Y),  assert(portal(DownX, Y)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_portal(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)))
         )
 
     ).

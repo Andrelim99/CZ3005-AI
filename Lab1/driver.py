@@ -537,7 +537,7 @@ def query_agent():
     # print("Safe: ", safe_at())
     for sol in safe_at():
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    # print("SAFE POS: ", safe_pos)
+    print("SAFE POS: ", safe_pos)
 
     # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
     tmp = set()
