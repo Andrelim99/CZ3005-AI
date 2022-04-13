@@ -157,11 +157,10 @@ def localisation():
     print()
     print("Portal maybe at: ", c)
 
-
+# ACTIONS
 
 # Move Forward
 def move_forward():
-    print("\nMoving Forward")
     c = list(prolog.query("moveforward([off, off, off, off, off, off])"))
 
 def turn_left():
@@ -171,6 +170,17 @@ def turn_left():
 def turn_right():
     print("\nTurning Right")
     c = list(prolog.query("turnright"))
+
+def pickup():
+    list(prolog.query("pickup"))
+
+def has_coin():
+    c = list(prolog.query("has_coin(Result)"))
+    result = (c[0]['Result'] == 'true')
+    # print(result)
+    return result
+
+
 
 
 def test_hasarrow():
@@ -292,8 +302,12 @@ def populate_helper(absMap, rIndex, cIndex, col):
             absMap[newDown][cIndex][2] = 'T'
 
     elif col == "C":
+        if not has_coin(): 
+            # print('\nPlacing Coin..')
             # for i in range(9):
-                absMap[rIndex][cIndex][6] = '*'       
+            absMap[rIndex][cIndex][6] = '*'       
+        else:
+            absMap[rIndex][cIndex][6] = '.'
 
 
     # Scream
@@ -305,13 +319,13 @@ def populate_helper(absMap, rIndex, cIndex, col):
 
 
 def create_abs_map():
-    global absMap
-    
+    global absMap    
     for (rIndex, row) in enumerate(MAP):
         for (cIndex, col) in enumerate(row):
             populate_helper(absMap, rIndex, cIndex, col)
 
 def print__map():
+    global absMap
     for z in range(7):
         for j in range(3):
             for col in absMap[z]:
@@ -353,10 +367,6 @@ def set_abs_agent_location():
             elif(i == 5):
                 agent_abs_map[absY][absX][8] = '@'
 
-    
-
-
-
 
 def update_absolute_agent_map():
     global agent_abs_map, stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos
@@ -381,6 +391,13 @@ def update_absolute_agent_map():
     
     for (y, x) in visited_pos:
         agent_abs_map[y][x][4] = 'S'
+
+    for (y, x) in glitter_pos:
+        # if not has_coin():
+        agent_abs_map[y][x][6] = '*'
+
+        
+
 
     # Set walls
     for (y, x) in wall_pos:
@@ -496,6 +513,7 @@ def query_agent():
     wumpus_pos = set()
     portal_pos = set()
     safe_pos = set()
+    glitter_pos = set()
 
 
 
@@ -517,17 +535,17 @@ def query_agent():
     # print("Walls: ", wall_at())
     for sol in wall_at():
         wall_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("WALLS POS: ", wall_pos)
+    # print("WALLS POS: ", wall_pos)
 
     # print("Wumpus: ", wumpus_at())
     for sol in wumpus_at():
         wumpus_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("WUMPUS POS: ", wumpus_pos)
+    # print("WUMPUS POS: ", wumpus_pos)
 
     # print("Portal: ", portal_at())
     for sol in portal_at():
         portal_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("PORTAL POS: ", portal_pos)
+    # print("PORTAL POS: ", portal_pos)
 
     # print("Visited: ", visited_at())
     for sol in visited_at():
@@ -537,21 +555,55 @@ def query_agent():
     # print("Safe: ", safe_at())
     for sol in safe_at():
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("SAFE POS: ", safe_pos)
+    # print("SAFE POS: ", safe_pos)
 
     # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
     tmp = set()
     for sol in confirm_not_wumpus_at():
         tmp.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("NOT WUMPUS POS: ", tmp)
+    # print("NOT WUMPUS POS: ", tmp)
 
     tmp = set()
     for sol in confirm_not_portal_at():
         tmp.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("NOT PORTAL POS: ", tmp)
+    # print("NOT PORTAL POS: ", tmp)
 
     
+def print_senses():
+    global senses
+    
+    if senses[0] =="on":
+        print("Confounded-", end='')
+    else:
+        print("C-", end="")
 
+    if  senses[1] =="on":
+        print("Stench-", end='')
+    else:
+        print("S-", end="")
+
+    if senses[2] =="on":
+        print("Tingle-", end='')
+    else:
+        print("T-", end="")
+
+    if senses[3] =="on":
+        print("Glitter-", end='')
+    else:
+        print("G-", end="")
+
+    if senses[4] =="on":
+        print("Bump-", end='')
+    else:
+        print("B-", end="")
+
+    if senses[5] =="on":
+        print("Scream")
+    else:
+        print("S")
+
+        
+    print()
 
 
 def update_all():
@@ -563,13 +615,13 @@ def update_all():
 
 
 def controls():
-    print__map()
-    print_Absolute_Map()
     global absDir, rX, rY, rDir, first_start, senses
+     
+    
     choice = 1
     first_start = 1
     while choice != 6:
-        print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
+        # print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
             1) Move Forward
             2) Turn Left
@@ -580,9 +632,9 @@ def controls():
         choice = int(input("Choice: "))
         if choice == 1:
             print("Attempting to move forward...")
-            # Check if front is a wall
+            # Check if forward is wall
             get_next_senses()            
-            print(senses)
+
             # print(bool(list(prolog.query(f"moveforward({senses})"))))
             move('moveforward', senses)
             move("turnright", senses)
@@ -591,8 +643,6 @@ def controls():
 
         elif choice == 2:
             # turn_left()  
-            print(senses)
-
             update_current_senses()
             move("turnleft", senses)
             absDir = DIRECTIONS[(DIRECTIONS.index(absDir)-1)%4]
@@ -608,75 +658,48 @@ def controls():
         elif choice == 4:
             update_current_senses()
             print("Attempting to pick up coin...")
+            move("pickup", senses)
+            create_abs_map()
+            update_current_senses()
+                
+            
         
         elif choice == 5:
             update_current_senses()
-            print("Attempting to shot arrow...")
+            print("Attempting to shoot arrow...")
 
-        print("BEFORE")
         update_all()
-
-        print("AFTER")
+        
+        
         print__map()
         print_Absolute_Map()
-        
+        print_senses()
         
 
     # Check if entered portal or WUMPUS
 
 
 def start_wumpus():
+    global senses
     reborn()
     create_abs_map()
     random_spawn()
     random_direction()
-    update_current_senses()
 
+    # Set Agent start and print initial map
+    update_current_senses()
+    reposition(senses)
+    update_all()
+    print__map()
+    print_Absolute_Map()   
+    print_senses()
+
+    # Loop controls
+    controls()
 
 start_wumpus()
 
-controls()
-
-# print("WUMPUS: ", wumpus_at())
 
 
-# reborn()
-# testShooting()
-# testPickup()
-# test_hasarrow()
-# shoot()
-# test_hasarrow()
-# shoot()
-# testMoveForward()
-
-# current()
-# visited()
-# move_forward()
-# current()
-# turn_right()
-# current()
-# move_forward()
-# current()
-# move_forward()
-# current()
-# turn_left()
-# current()
-
-# move("moveforward", ["off", "off", "off", "off", "off", "off"])
-# visited()
-# # safe()
-# move("moveforward", ["off", "on", "off", "off", "off", "off"])
-# visited()
-# safe()
-
-# move("moveforward", ["on", "off", "off", "off", "off", "off"])
-
-# print("After confounded")
-# reposition(["on", "on", "on", "on", "off", "off"])
-
-# visited()
-# safe()
-
-# localisation()
 
 

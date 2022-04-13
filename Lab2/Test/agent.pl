@@ -21,6 +21,7 @@ visited/2,
 reposition/1,
 wumpus/2,
 portal/2,
+% Updated as at 13/4/2021
 update_safe/2,
 remove_all_in_wall/2,
 confirm_not_wumpus/2,
@@ -45,15 +46,18 @@ reborn:-
     retractall(relative_position(_, _)),
     retractall(wall(_, _)),
 
+    retractall(comfirm_not_wumpus(_, _)),
+    retractall(comfirm_not_portal(_, _)),
 
-
+    % Not to be reset in reposition-----
     assert(has_coin(false)),
     assert(fired(false)),
-    assert(wumpus_dead(false)),
+    assert(wumpus_dead(false)),    
+    % ----------------------------------
+    
     assert(confounded(true)),
     assert(safe(0,0)),
     assert(visited(0,0)),
-    
     assert(direction(rnorth)),
     assert(relative_position(0, 0)).
     
@@ -62,8 +66,8 @@ reborn:-
 reposition(L):-
         retractall(visited(_, _)),
         retractall(wumpus(_, _)),
-        retractall(confounded(_)),
         retractall(portal(_, _)),
+        retractall(confounded(_)),
         retractall(tingle(_, _)),
         retractall(glitter(_, _)),
         retractall(stench(_, _)),
@@ -72,11 +76,15 @@ reposition(L):-
         retractall(relative_position(_, _)),
         retractall(wall(_, _)),
 
-        assert(direction(rnorth)),
-        assert(relative_position(0, 0)),
+        retractall(comfirm_not_wumpus(_, _)),
+        retractall(comfirm_not_portal(_, _)),
+
+        assert(confounded(true)),
         assert(safe(0,0)),
         assert(visited(0,0)),
-        percept(0,0, L).
+        assert(direction(rnorth)),
+        assert(relative_position(0, 0)),
+        percept(L).
 
 retract_portal_wumpus(X, Y) :-
     portal(X, Y), wumpus(X, Y) -> retract(portal(X, Y)), retract(wumpus(X, Y));
@@ -121,7 +129,8 @@ remove_all_in_wall(X, Y) :-
 
 % Pick up
 pickup([_, _, _, G|_]) :-
-    G == on, assert(has_coin(true)).
+    current(X, Y, _),
+    G == on, retract(has_coin(false)), retract(glitter(X, Y)), assert(has_coin(true)).
 
 
 % Fire arrow
