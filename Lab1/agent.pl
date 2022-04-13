@@ -286,5 +286,11 @@ hasarrow :-
 current(X, Y, Dir) :-
     relative_position(X, Y), direction(Dir).
 
+explore(L) :-
+    current(X, Y, Dir), CurX = X, CurY = Y,
+    (
+           ( glitter(CurX, CurY), L = pickup([X, Y, Dir, G|_]) ); %I'm not sure how to let L be the pickup action
+
+    )
 
 
