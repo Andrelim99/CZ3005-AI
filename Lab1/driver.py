@@ -14,16 +14,16 @@ prolog.consult("agent.pl")
 # NEED CHANGE DEPENDING ON THE PROPER ORDER
 NUMROW = 7
 NUMCOL = 6
-ENTITIES = ['W', 'P', 'C', '#']
+ENTITIES = ['W', 'P', '#']
 DIRECTIONS = ['n', 'e', 's', 'w']
 # Map - Row by Column (7 x 6)
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
        ['#', '', '', '', '', '#'],      #1
-       ['#', 'P', '', 'P', '', '#'],    #2
-       ['#', 'W', '', '', 'C', '#'],    #3
+       ['#', '', 'P', '', '', '#'],    #2
+       ['#', '', '', 'W', 'C', '#'],    #3
        ['#', '', '', '', '', '#'],      #4
-       ['#', 'P', '', '', '', '#'],     #5
+       ['#', '', 'P', '', '', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 # MAP = transpose([
@@ -107,6 +107,11 @@ def visited_at():
 def safe_at():
     return list(prolog.query(f"safe(X, Y)"))
 
+def confirm_not_wumpus_at():
+    return list(prolog.query(f"confirm_not_wumpus(X, Y)"))
+
+def confirm_not_portal_at():
+    return list(prolog.query(f"confirm_not_portal(X, Y)"))
 
 def localisation():
     global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
@@ -497,17 +502,17 @@ def query_agent():
     # print("Stench: ", stench_at())
     for sol in stench_at():
         stench_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("STENCH POS: ", stench_pos)
+    # print("STENCH POS: ", stench_pos)
 
     # print("Tingle: ", tingle_at())
     for sol in tingle_at():
         tingle_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("TINGLE POS: ", tingle_pos)
+    # print("TINGLE POS: ", tingle_pos)
 
     # print("Glitter: ", glitter_at())
     for sol in glitter_at():
         glitter_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("GLITTER POS: ", glitter_pos)
+    # print("GLITTER POS: ", glitter_pos)
 
     # print("Walls: ", wall_at())
     for sol in wall_at():
@@ -519,7 +524,7 @@ def query_agent():
         wumpus_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     print("WUMPUS POS: ", wumpus_pos)
 
-    print("Portal: ", portal_at())
+    # print("Portal: ", portal_at())
     for sol in portal_at():
         portal_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     print("PORTAL POS: ", portal_pos)
@@ -527,15 +532,28 @@ def query_agent():
     # print("Visited: ", visited_at())
     for sol in visited_at():
         visited_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("VISITED POS: ", visited_pos)
+    # print("VISITED POS: ", visited_pos)
 
     # print("Safe: ", safe_at())
     for sol in safe_at():
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("SAFE POS: ", safe_pos)
+    # print("SAFE POS: ", safe_pos)
 
+    # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
+    tmp = set()
+    for sol in confirm_not_wumpus_at():
+        tmp.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("NOT WUMPUS POS: ", tmp)
+
+    tmp = set()
+    for sol in confirm_not_portal_at():
+        tmp.add((get_abs_coord((sol['Y'], sol['X']))))
+    print("NOT PORTAL POS: ", tmp)
 
     
+
+
+
 def update_all():
     redefine_abs_coord()
     query_agent()
