@@ -108,17 +108,17 @@ moveforward([_, _, _, _, B, _]) :-
 % If Bump -> Wall
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
-        (
-        ((CurDir == rnorth, NewY is CurY + 1) -> relative_position(CurX, CurY));
+    (
+        (CurDir == rnorth, NewY is CurY + 1);
         % Go Relative Right
-        ((CurDir == reast, NewX is CurX + 1) -> assert(relative_position(CurX, CurY)));
+        (CurDir == reast, NewX is CurX + 1);
         % Go Relative Down
-        ((CurDir == rsouth, NewY is CurY - 1) -> assert(relative_position(CurX, CurY)));
+        (CurDir == rsouth, NewY is CurY - 1);
         % Go Relative Left
-        ((CurDir == rwest, NewX is CurX - 1) -> assert(relative_position(CurX, CurY)))
+        (CurDir == rwest, NewX is CurX - 1)
     ),
 
-    (\+wall(CurX, NewY), assert(wall(CurX, NewY))), (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))).
+    (\+wall(CurX, NewY) -> assert(wall(CurX, NewY))), (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))), (safe(CurX, NewY) -> retract(safe(CurX, NewY)) ).
 
 % Pick up
 pickup([_, _, _, G|_]) :-
