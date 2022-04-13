@@ -55,7 +55,7 @@ reborn:-
     assert(wumpus_dead(false)),    
     % ----------------------------------
     
-    assert(confounded(true)),
+
     assert(safe(0,0)),
     assert(visited(0,0)),
     assert(direction(rnorth)),
@@ -79,7 +79,7 @@ reposition(L):-
         retractall(comfirm_not_wumpus(_, _)),
         retractall(comfirm_not_portal(_, _)),
 
-        assert(confounded(true)),
+
         assert(safe(0,0)),
         assert(visited(0,0)),
         assert(direction(rnorth)),
@@ -167,18 +167,19 @@ move(A, L) :-
 move(A, L) :-
     A == pickup, pickup(L).
 
-
 move(A, L) :-
     A == turnleft, turnleft, percept(L).
 
 move(A, L) :-
     A == turnright, turnright, percept(L).
 
+move(A, L) :-
+    A == shoot, shoot, percept(L).
+
 % Percept Confundus
-percept([C, S, T, G, _, Sc]) :-
+percept([_, S, T, G, _, Sc]) :-
     current(X, Y, CurDir), (
-    % Confundus?
-    (C == on, (\+confounded(true), (assert(confounded(true)))));
+    
     % Stench?
     (S == on, (\+stench(X, Y), assert(stench(X, Y))));
     % Tingle?
@@ -188,11 +189,16 @@ percept([C, S, T, G, _, Sc]) :-
     % Bump? - Handled in moveforward
     % (B == on, (\+wall(X, Y), assert(wall(X, Y)))));
     % Scream?
-    (Sc == on, (\+wumpus_dead(true), assert(wumpus_dead(true))))
+    (Sc == on, assert(wumpus_dead(true)), retract(wumpus_dead(false)))
     ).
 
+    
 
 
+% percept([C|_]) :-
+%     % Confundus?
+%     C == on -> \+confounded(true), (assert(confounded(true)));
+%     C == off ->  confounded(true), retract(confounded(true)).
 
 percept([_, S, T|_]) :-
     current(X, Y, CurDir),
@@ -229,11 +235,10 @@ percept([_, S|_]) :-
         (           
             (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
             (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y),\+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
             (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
         )
     ).
-
 
 
 percept([_, _, T|_]) :-
@@ -296,4 +301,5 @@ current(X, Y, Dir) :-
     relative_position(X, Y), direction(Dir).
 
 
-
+wumpus_dead :-
+    wumpus_dead(true).

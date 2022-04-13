@@ -40,8 +40,13 @@ absMap = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL
 agent_abs_map = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW) ]
 
 
-# To call upon populate helper
+# World Variables
 first_start = 0
+actual_wumpus = set()
+actual_portals = set()
+actual_coin = set()
+
+senses = ["on", "off", "off", "off", "off", "off"]
 
 # Agent variables - X is column, Y is rows!
 
@@ -73,9 +78,16 @@ wall_pos = set()
 safe_pos = set()
 visited_pos = set()
 
-
-
-senses = ["on", "off", "off", "off", "off", "off"]
+def reset_all_positions():
+    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos 
+    stench_pos = set()
+    tingle_pos = set()
+    glitter_pos = set()
+    wumpus_pos = set()
+    portal_pos = set()
+    wall_pos = set()
+    safe_pos = set()
+    visited_pos = set()
 
 # AGENT FUNCTIONS
 # Reborn to reset agent
@@ -157,8 +169,7 @@ def localisation():
     print()
     print("Portal maybe at: ", c)
 
-# ACTIONS
-
+# ACTIONS TESTING - Not actually used for calling
 # Move Forward
 def move_forward():
     c = list(prolog.query("moveforward([off, off, off, off, off, off])"))
@@ -180,20 +191,23 @@ def has_coin():
     # print(result)
     return result
 
-
-
-
-def test_hasarrow():
-    c = bool(list(prolog.query("hasarrow")))
-    print("\nHas arrow: ", c)
-
-
 def shoot():
     c = bool(list(prolog.query("shoot")))
     if(c):
         print("Shot arrow!")
     else:
         print("Cannot shoot!")
+# -----------------------------------------------
+
+
+def hasarrow():
+    c = bool(list(prolog.query("hasarrow")))
+    # print("\nHas arrow: ", c)
+    return c
+
+def wumpus_dead():
+    # print(list(prolog.query('wumpus_dead(WHAT)')))
+    return bool(list(prolog.query('wumpus_dead')))
 
 def current():
     global rX, rY, rDir
@@ -261,6 +275,7 @@ def random_direction():
 
 # Symbol Populater for default map - made my own modifications
 def populate_helper(absMap, rIndex, cIndex, col):
+    global actual_wumpus, actual_portals, actual_coin
     newRight = cIndex + 1
     newLeft = cIndex - 1
     newUp = rIndex + 1
@@ -268,7 +283,8 @@ def populate_helper(absMap, rIndex, cIndex, col):
     # Confounded
 
     # Stench
-    if col == "W":  
+    if col == "W":
+        actual_wumpus.add((rIndex, cIndex))
         for i in range(9):
             absMap[rIndex][cIndex][i] = 'W'     
         # Right
@@ -285,7 +301,8 @@ def populate_helper(absMap, rIndex, cIndex, col):
             absMap[newDown][cIndex][1] = '='
 
     # Tingle
-    elif col == "P":       
+    elif col == "P":
+        actual_portals.add((rIndex, cIndex))       
         for i in range(9):
             absMap[rIndex][cIndex][i] = 'P'
         # Right
@@ -302,6 +319,7 @@ def populate_helper(absMap, rIndex, cIndex, col):
             absMap[newDown][cIndex][2] = 'T'
 
     elif col == "C":
+        actual_coin.add((rIndex, cIndex))
         if not has_coin(): 
             # print('\nPlacing Coin..')
             # for i in range(9):
@@ -505,6 +523,42 @@ def get_next_senses():
     #     senses[1] = 'on'
 
 
+def facing_wumpus():
+    global absX, absY, absDir, actual_wumpus
+    
+    for (y, x) in actual_wumpus:
+        print(y, x)
+        print(absY, absX)
+        # If same col
+        if x == absX:
+            # Check if agent above or below
+            # Wumpus Below, so agent shd face south
+            if y > absY:
+                if absDir == 's':
+                    return True
+            else:
+                if absDir == 'n':
+                    return True
+        
+        elif y == absY:
+            if x > absX:
+                # Wumpus To the right, so agent shd face east
+                if absDir == 'e':
+                    return True
+            else:
+                if absDir == 'w':
+                    return True
+        
+    return False
+
+
+    # OR If same row
+
+# Function to check if wumpus got killed after shooting
+def check_if_wumpus_killed():
+    global senses
+    if facing_wumpus():
+        senses[5] = 'on'
 
 # TO DO
 def query_agent():
@@ -666,33 +720,60 @@ def controls():
         
         elif choice == 5:
             update_current_senses()
+        
             print("Attempting to shoot arrow...")
 
+            # Check if has arrow
+            if hasarrow():
+                # Check if wumpus in direction of arrow shot and is killed
+                check_if_wumpus_killed()
+                print(senses)
+                move("shoot", senses)
+                # print("WUMPUS DEAD: ", wumpus_dead())
+            else:
+                print("No arrows to shoot")
+
         update_all()
-        
-        
-        print__map()
-        print_Absolute_Map()
-        print_senses()
+        # Check if entered wumpus cell
+        if  (absY, absX) in actual_wumpus and not wumpus_dead():
+            print("Oops... Agent has been devoured! Game Over!")
+            break
+
+        # check if entered portal
+        elif (absY, absX) in actual_portals:
+            print("Entered Portal. Repositioning...")
+            world_reposition()
+
+        # Else
+        else:        
+            print__map()
+            print_Absolute_Map()
+            print_senses()
         
 
     # Check if entered portal or WUMPUS
-
-
-def start_wumpus():
-    global senses
-    reborn()
-    create_abs_map()
+def world_reposition():
+    global senses, first_start
+    first_start = 0
+    # Initialise Agent
     random_spawn()
     random_direction()
-
-    # Set Agent start and print initial map
+    reset_all_positions()
     update_current_senses()
     reposition(senses)
     update_all()
     print__map()
     print_Absolute_Map()   
     print_senses()
+
+def start_wumpus():
+   # Set Agent start and print initial map
+    reborn()
+    create_abs_map()
+    
+
+    # Call reposition
+    world_reposition()
 
     # Loop controls
     controls()
