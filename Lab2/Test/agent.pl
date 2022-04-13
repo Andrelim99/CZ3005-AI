@@ -7,7 +7,7 @@ gameStart/1,
 stench/2,
 tingle/2,
 confounded/1,
-percept/3,
+percept/1,
 wumpus_dead/1,
 moveforward/1,
 glitter/2,
@@ -21,7 +21,10 @@ visited/2,
 reposition/1,
 wumpus/2,
 portal/2,
-update_safe/2.
+update_safe/2,
+remove_all_in_wall/2,
+confirm_not_wumpus/2,
+confirm_not_portal/2.
 
 
 
@@ -75,6 +78,10 @@ reposition(L):-
         assert(visited(0,0)),
         percept(0,0, L).
 
+retract_portal_wumpus(X, Y) :-
+    portal(X, Y), wumpus(X, Y) -> retract(portal(X, Y)), retract(wumpus(X, Y));
+    portal(X, Y) -> retract(portal(X, Y));
+    wumpus(X, Y) -> retract(wumpus(X, Y)).
 
 
 
@@ -90,37 +97,27 @@ moveforward([_, _, _, _, B, _]) :-
         % Go Relative Left
         ((CurDir == rwest, NewX is CurX - 1) -> assert(relative_position(NewX, CurY)))
     ),
-    relative_position(X, Y),(\+visited(X, Y), assert(visited(X, Y))), (\+safe(X, Y), assert(safe(X, Y))),(portal(X, Y) -> retract(portal(X, Y))), (wumpus(X, Y) -> retract(wumpus(X, Y))).
-
-% Certain there is a wall - Not sure yet
-% moveforward(_) :-
-%     current(CurX, CurY, CurDir),    
-%     (
-%         ((CurDir == rnorth, NewY is CurY + 1), wall(CurX, NewY));
-%         % Go Relative Right
-%         ((CurDir == reast, NewX is CurX + 1), wall(NewX, CurY));
-%         % Go Relative Down
-%         ((CurDir == rsouth, NewY is CurY - 1), wall(CurX, NewY));
-%         % Go Relative Left
-%         ((CurDir == rwest, NewX is CurX - 1), wall(NewX, CurY))
-%     ).
+    relative_position(X, Y),(\+visited(X, Y), assert(visited(X, Y))), (\+safe(X, Y), assert(safe(X, Y))), retract_portal_wumpus(X, Y).
 
 % If Bump -> Wall
 moveforward([_, _, _, _, B|_]) :-
     B == on, current(CurX, CurY, CurDir),
     (
-        ((CurDir == rnorth, NewY is CurY + 1) -> ( (\+wall(CurX, NewY) -> assert(wall(CurX, NewY))), (safe(CurX, NewY) -> retract(safe(CurX, NewY)) ),
-                                                (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))) ) );
+        (CurDir == rnorth, NewY is CurY + 1, NewX is CurX);
         % Go Relative Right
-        ((CurDir == reast, NewX is CurX + 1) -> ( (\+wall(NewX, CurY) -> assert(wall(NewX, CurY))), (safe(NewX, CurY) -> retract(safe(NewX, CurY)) ),
-                                                (portal(NewX, CurY) -> retract(portal(NewX, CurY))), (wumpus(NewX, CurY), retract(wumpus(NewX, CurY))) ) );
+        (CurDir == reast, NewX is CurX + 1, NewY is CurY);
         % Go Relative Down
-        ((CurDir == rsouth, NewY is CurY - 1) -> ( (\+wall(CurX, NewY) -> assert(wall(CurX, NewY))), (safe(CurX, NewY) -> retract(safe(CurX, NewY)) ),
-                                                (portal(CurX, NewY) -> retract(portal(CurX, NewY))), (wumpus(CurX, NewY) -> retract(wumpus(CurX, NewY))) ) );
+        (CurDir == rsouth, NewY is CurY - 1, NewX is CurX);
         % Go Relative Left
-        ((CurDir == rwest, NewX is CurX - 1) ->  ( (\+wall(NewX, CurY) -> assert(wall(NewX, CurY))), (safe(NewX, CurY) -> retract(safe(NewX, CurY)) ),
-                                                (portal(NewX, CurY) -> retract(portal(NewX, CurY))), (wumpus(NewX, CurY) -> retract(wumpus(NewX, CurY))) ) )
-    ).
+        (CurDir == rwest, NewX is CurX - 1, NewY is CurY)
+    ),
+
+    \+wall(NewX, NewY), assert(wall(NewX, NewY)), remove_all_in_wall(NewX, NewY).%, (portal(NewX, NewY) -> retract(portal(NewX, NewY))), (wumpus(NewX, NewY) -> retract(wumpus(NewX, NewY))).
+
+remove_all_in_wall(X, Y) :-
+    safe(X, Y) -> retract(safe(X, Y));
+    retract_portal_wumpus(X, Y).
+
 
 % Pick up
 pickup([_, _, _, G|_]) :-
@@ -194,12 +191,26 @@ percept([_, S, T|_]) :-
     (
         UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
         (
-            (\+wall(X, UpY), \+safe(X, UpY), assert(safe(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), assert(safe(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), assert(safe(UpX, Y)));
-            (\+wall(DownX, Y), \+safe(DownX, Y), assert(safe(DownX, Y)))
+            (\+wall(X, UpY), \+safe(X, UpY), assert(safe(X, UpY)), retract_portal_wumpus(X, UpY));
+            (\+wall(X, DownY), \+safe(X, DownY), assert(safe(X, DownY)), retract_portal_wumpus(X, DownY));
+            (\+wall(UpX, Y), \+safe(UpX, Y), assert(safe(UpX, Y)), retract_portal_wumpus(UpX, Y));
+            (\+wall(DownX, Y), \+safe(DownX, Y), assert(safe(DownX, Y)), retract_portal_wumpus(DownX, Y))
         )
     ).
+
+percept([_, S|_]) :-
+    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+        (
+            S == off, 
+            (           
+                (\+confirm_not_wumpus(X, UpY), assert(confirm_not_wumpus(X, UpY)), retract(wumpus(X, UpY)));
+                (\+confirm_not_wumpus(X, DownY), assert(confirm_not_wumpus(X, DownY)), retract(wumpus(X, DownY)));
+                (\+confirm_not_wumpus(UpX, Y), assert(confirm_not_wumpus(UpX, Y)), retract(wumpus(UpX, Y)));
+                (\+confirm_not_wumpus(DownX, Y), assert(confirm_not_wumpus(DownX, Y)), retract(wumpus(DownX, Y)))
+            )
+        ).
+
+
 
 
 percept([_, S|_]) :-
@@ -207,12 +218,26 @@ percept([_, S|_]) :-
     (
         S == on, 
         (           
-            (\+wall(X, UpY), \+safe(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
+            (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
+            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
         )
     ).
+
+
+
+percept([_, _, T|_]) :-
+    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+        (
+            T == off, 
+            (           
+                (\+confirm_not_portal(X, UpY), assert(confirm_not_portal(X, UpY)), retract(portal(X, UpY)));
+                (\+confirm_not_portal(X, DownY), assert(confirm_not_portal(X, DownY)), retract(portal(X, DownY)));
+                (\+confirm_not_portal(UpX, Y), assert(confirm_not_portal(UpX, Y)), retract(portal(UpX, Y)));
+                (\+confirm_not_portal(DownX, Y), assert(confirm_not_portal(DownX, Y)), retract(portal(DownX, Y)))
+            )
+        ).
 
 percept([_, _, T|_]) :-
     current(X, Y, CurDir), UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
@@ -220,10 +245,10 @@ percept([_, _, T|_]) :-
     (
         T == on,
         (
-            (\+wall(X, UpY), \+safe(X, UpY), \+portal(X, UpY), assert(portal(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));            
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+portal(DownX, Y),  assert(portal(DownX, Y)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)))
+            (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_portal(X, UpY), \+portal(X, UpY), assert(portal(X, UpY)));
+            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_portal(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));            
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_portal(DownX, Y), \+portal(DownX, Y),  assert(portal(DownX, Y)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_portal(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)))
         )
 
     ).
