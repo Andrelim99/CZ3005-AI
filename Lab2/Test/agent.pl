@@ -25,7 +25,8 @@ portal/2,
 update_safe/2,
 remove_all_in_wall/2,
 confirm_not_wumpus/2,
-confirm_not_portal/2.
+confirm_not_portal/2,
+explore/1.
 
 
 
@@ -135,7 +136,15 @@ pickup([_, _, _, G|_]) :-
 
 % Fire arrow
 shoot :-
-    hasarrow, retractall(fired(_)), assert(fired(true)).
+    hasarrow, retractall(fired(_)), assert(fired(true)),
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X, NewY is Y + 1);
+        (CurDir == rsouth, NewX is X, NewY is Y - 1);
+        (CurDir == reast, NewX is X+1, NewY is Y);
+        (CurDir == rwest, NewX is X-1, NewY is Y)
+    ),
+    \+portal(NewX, NewY), \+safe(NewX, NewY), assert(safe(NewX, NewY)).
     
 
 % Turn left
@@ -294,3 +303,62 @@ wumpus_dead :-
 
 confounded :-
     confounded(true).
+
+
+explore(moveforward) :-
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X, NewY is Y + 1);
+        (CurDir == rsouth, NewX is X, NewY is Y - 1);
+        (CurDir == reast, NewX is X+1, NewY is Y);
+        (CurDir == rwest, NewX is X-1, NewY is Y)
+    ),
+    safe(NewX, NewY), \+visited(NewX, NewY).
+
+explore(pickup) :-
+    current(X, Y, _),
+    glitter(X, Y).
+
+explore(turnleft) :-
+    \+explore(moveforward), \+explore(pickup), \+explore(shoot), adjacent_safe_cell.
+
+adjacent_safe_cell :-
+    current(X, Y, CurDir),
+    UpX is X+1, DownX is X-1, UpY is Y+1, DownY is Y-1,
+    (
+        (safe(X, UpY), \+visited(X, UpY));
+        (safe(X,DownY), \+visited(X,DownY));
+        (safe(UpX, Y), \+visited(UpX, Y));
+        (safe(DownX, Y), \+visited(DownX, Y))
+    ).
+
+explore(shoot) :-
+    \+explore(pickup), \+adjacent_safe_cell, hasarrow, 
+    adjacent_wumpus.
+
+adjacent_wumpus :-
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X, NewY is Y + 1);
+        (CurDir == rsouth, NewX is X, NewY is Y - 1);
+        (CurDir == reast, NewX is X+1, NewY is Y);
+        (CurDir == rwest, NewX is X-1, NewY is Y)
+    ),
+    wumpus(NewX, NewY).
+
+
+% BACKTRACKING... NOT NEEDED APPARENTLY?
+% explore(turnright) :-
+%     \+adjacent_safe_cell, \+explore(moveforward), \+explore(shoot).
+
+% explore(moveforward) :-
+%     \+adjacent_safe_cell,
+%     current(X, Y, CurDir),
+%     (
+%         (CurDir == rnorth, NewX is X, NewY is Y + 1);
+%         (CurDir == rsouth, NewX is X, NewY is Y - 1);
+%         (CurDir == reast, NewX is X+1, NewY is Y);
+%         (CurDir == rwest, NewX is X-1, NewY is Y)
+%     ),
+%     safe(NewX, NewY).
+    

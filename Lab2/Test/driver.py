@@ -168,6 +168,9 @@ def current():
 def move(A, L):
     list(prolog.query(f"move({A}, {L})"))
 
+def explore():
+    return list(prolog.query("explore(L)"))
+
 def reposition(L):
     list(prolog.query(f"reposition({L})"))
 
@@ -369,9 +372,9 @@ def print__map():
             for col in absMap[z]:
                 for i in range(3):
                     print(col[i + j*3], end='')
-                print(' | ', end='')
+                print('  ', end='')
             print()
-        print('-'*35)
+        print()
     print('#'*46)
 # ----------------------------
 
@@ -437,6 +440,14 @@ def update_absolute_agent_map():
         # if not has_coin():
         agent_abs_map[y][x][6] = '*'
 
+    for (y, x) in stench_pos:
+        # if not has_coin():
+        agent_abs_map[y][x][1] = '='
+    
+    for (y, x) in tingle_pos:
+        # if not has_coin():
+        agent_abs_map[y][x][2] = 'T'
+
         
 
 
@@ -460,9 +471,9 @@ def print_Absolute_Map():
             for col in agent_abs_map[z]:
                 for i in range(3):
                     print(col[i + j*3], end='')
-                print(' | ', end='')
+                print('  ', end='')
             print()
-        print('-'*35)
+        print()
 
     print("\n"+'#'*46)
 
@@ -472,7 +483,7 @@ agent_relative_map = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in 
 
 def recalulate_numRC():
     global r_map_rows, r_map_cols, rY, rX
-    print("ENTERED")
+
     if (rY, rX) in r_visited_pos or (rY, rX) == (0, 0):
         return
 
@@ -561,15 +572,22 @@ def update_relative_agent_map():
         y, x = calculate_r_postion(y, x)
         agent_relative_map[y][x][6] = '*'
 
+    for (y, x) in r_stench_pos:
+        # if not has_coin():
+        y, x = calculate_r_postion(y, x)
+        agent_relative_map[y][x][1] = '='
+    
+    for (y, x) in r_tingle_pos:
+        # if not has_coin():
+        y, x = calculate_r_postion(y, x)
+        agent_relative_map[y][x][2] = 'T'
+    
         
 
 
     # Set walls
-    for (y, x) in r_wall_pos:
-        print("Before Relative: ", y, x)
-        
+    for (y, x) in r_wall_pos:        
         y, x = calculate_r_postion(y, x)
-        print("After Relative: ", y, x)
         for i in range(9):
             agent_relative_map[y][x][i] = '#'
 
@@ -672,8 +690,6 @@ def facing_wumpus():
     global absX, absY, absDir, actual_wumpus
     
     for (y, x) in actual_wumpus:
-        print(y, x)
-        print(absY, absX)
         # If same col
         if x == absX:
             # Check if agent above or below
@@ -701,6 +717,7 @@ def check_if_wumpus_killed():
     global senses
     if facing_wumpus():
         senses[5] = 'on'
+        print("Wumpus has been slain!")
 
 # ----------------------------
 
@@ -845,6 +862,7 @@ Pick an action for the agent:
 4) Pick Up Coin
 5) Shoot
 ''')
+        print("EXPLORE: ", explore())
         choice = int(input("Choice: "))
         if choice == 1:
             print("Attempting to move forward...")
@@ -889,7 +907,6 @@ Pick an action for the agent:
             if hasarrow():
                 # Check if wumpus in direction of arrow shot and is killed
                 check_if_wumpus_killed()
-                print(senses)
                 move("shoot", senses)
                 # print("WUMPUS DEAD: ", wumpus_dead())
             else:
