@@ -94,6 +94,8 @@ def reset_all_positions():
 def reborn():
     list(prolog.query("reborn"))
 
+def is_confounded():
+    print(bool(list(prolog.query("confounded"))))
 
 def stench_at():
     return list(prolog.query(f"stench(X, Y)"))
@@ -669,12 +671,11 @@ def update_all():
 
 
 def controls():
-    global absDir, rX, rY, rDir, first_start, senses
-     
-    
+    global absDir, rX, rY, rDir, senses
+
     choice = 1
-    first_start = 1
     while choice != 6:
+        is_confounded()
         # print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
             1) Move Forward
@@ -765,6 +766,7 @@ def world_reposition():
     print__map()
     print_Absolute_Map()   
     print_senses()
+    first_start = 1
 
 def start_wumpus():
    # Set Agent start and print initial map

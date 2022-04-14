@@ -195,10 +195,10 @@ percept([_, S, T, G, _, Sc]) :-
     
 
 
-% percept([C|_]) :-
-%     % Confundus?
-%     C == on -> \+confounded(true), (assert(confounded(true)));
-%     C == off ->  confounded(true), retract(confounded(true)).
+percept([C|_]) :-
+    % Confundus?
+    C == on -> \+confounded(true), (assert(confounded(true)));
+    C == off ->  confounded(true), retract(confounded(true)).
 
 percept([_, S, T|_]) :-
     current(X, Y, CurDir),
@@ -303,3 +303,6 @@ current(X, Y, Dir) :-
 
 wumpus_dead :-
     wumpus_dead(true).
+
+confounded :-
+    confounded(true).
