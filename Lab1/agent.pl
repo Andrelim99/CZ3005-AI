@@ -370,8 +370,8 @@ adjacent_wumpus :-
 %     current(X, Y, Dir), CurX = X, CurY = Y,
 %     (
 %            ( glitter(CurX, CurY) -> L = pickup([X, Y, Dir, G|_]) ), %I'm not sure how to let L be the pickup action
-%            ( tingle(CurX, CurY)-> L = ),
+%            ( tingle(CurX, CurY)-> L = ), %if tingle is sensed at adj cells, move back?
 %            ( stench(CurX, CurY) -> L = ),
 %            ( (tingle(CurX, CurY), stench(CurX, CurY)) -> L =),
-%            ( safe(CurX, CurY) -> L = moveforward)
+%            ( safe(CurX, CurY) )
 %     ).
