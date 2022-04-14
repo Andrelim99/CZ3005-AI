@@ -1,47 +1,34 @@
-
 import random
-from matplotlib.pyplot import get
-from numpy import flip, transpose
 from pyswip import Prolog
-# import pyswip
 
 prolog = Prolog()
-
 prolog.consult("agent.pl")
 
-
-
-# NEED CHANGE DEPENDING ON THE PROPER ORDER
 NUMROW = 7
 NUMCOL = 6
 ENTITIES = ['W', 'P', '#']
-DIRECTIONS = ['n', 'e', 's', 'w']
+DIRECTIONS = ['n', 'e', 's', 'w']  # DO NOT CHANGE DIRECTION ORDER
 # Map - Row by Column (7 x 6)
-MAP = [  #0   1    2    3    4    5
-       ['#', '#', '#', '#', '#', '#'],  #0
-       ['#', '', '', '', '', '#'],      #1
-       ['#', '', 'P', '', '', '#'],    #2
-       ['#', '', '', 'W', 'C', '#'],    #3
-       ['#', '', '', '', '', '#'],      #4
-       ['#', '', 'P', '', '', '#'],     #5
-       ['#', '#', '#', '#', '#', '#']]  #6
+MAP = [  # 0   1    2    3    4    5
+    ['#', '#', '#', '#', '#', '#'],  # 0
+    ['#', '', '', '', '', '#'],  # 1
+    ['#', '', 'P', '', '', '#'],  # 2
+    ['#', '', '#', 'W', 'C', '#'],  # 3
+    ['#', '', '', '', '', '#'],  # 4
+    ['#', '', 'P', '', '', '#'],  # 5
+    ['#', '#', '#', '#', '#', '#']]  # 6
 
-# MAP = transpose([
-#        ['#', '#', '#', '#', '#', '#'],
-#        ['#', '', '', '', '', '#'],
-#        ['#', 'P', '', 'P', '', '#'],
-#        ['#', 'W', '', '', 'C', '#'],
-#        ['#', '', '', '', '', '#'],
-#        ['#', 'P', '', '', '', '#'],
-#        ['#', '#', '#', '#', '#', '#']])
+# Create 7 x 6 x 9 [] * 7
+absMap = [[['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW)]
+agent_abs_map = [[['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW)]
 
-# Create 7 x 6 x 9 [] * 7 
-absMap = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW) ]
-agent_abs_map = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW) ]
-
-
-# To call upon populate helper
+# World Variables
 first_start = 0
+actual_wumpus = set()
+actual_portals = set()
+actual_coin = set()
+
+senses = ["on", "off", "off", "off", "off", "off"]
 
 # Agent variables - X is column, Y is rows!
 
@@ -50,20 +37,20 @@ xOffset = 1
 yOffset = -1
 flipped = False
 
-
-
+# RELATIVE POSITION
 rDir = 'rnorth'
-rX =  0
+rX = 0
 rY = 0
-
 
 spawnX = ''
 spawnY = ''
 
+# ABSOLUTE POSITION
 absDir = ''
 absX = ''
 absY = ''
 
+# SETS OF POSITION OF AGENT'S KNOWLEGE
 stench_pos = set()
 tingle_pos = set()
 glitter_pos = set()
@@ -74,8 +61,17 @@ safe_pos = set()
 visited_pos = set()
 
 
+def reset_all_positions():
+    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
+    stench_pos = set()
+    tingle_pos = set()
+    glitter_pos = set()
+    wumpus_pos = set()
+    portal_pos = set()
+    wall_pos = set()
+    safe_pos = set()
+    visited_pos = set()
 
-senses = ["on", "off", "off", "off", "off", "off"]
 
 # AGENT FUNCTIONS
 # Reborn to reset agent
@@ -83,36 +79,79 @@ def reborn():
     list(prolog.query("reborn"))
 
 
+def is_confounded():
+    print(bool(list(prolog.query("confounded"))))
+
+
 def stench_at():
     return list(prolog.query(f"stench(X, Y)"))
+
 
 def tingle_at():
     return list(prolog.query(f"tingle(X, Y)"))
 
+
 def glitter_at():
     return list(prolog.query(f"glitter(X, Y)"))
+
 
 def wall_at():
     return list(prolog.query(f"wall(X, Y)"))
 
+
 def wumpus_at():
     return list(prolog.query(f"wumpus(X, Y)"))
+
 
 def portal_at():
     return list(prolog.query(f"portal(X, Y)"))
 
+
 def visited_at():
     return list(prolog.query(f"visited(X, Y)"))
+
 
 def safe_at():
     return list(prolog.query(f"safe(X, Y)"))
 
+
 def confirm_not_wumpus_at():
     return list(prolog.query(f"confirm_not_wumpus(X, Y)"))
+
 
 def confirm_not_portal_at():
     return list(prolog.query(f"confirm_not_portal(X, Y)"))
 
+
+def hasarrow():
+    c = bool(list(prolog.query("hasarrow")))
+    # print("\nHas arrow: ", c)
+    return c
+
+
+def wumpus_dead():
+    # print(list(prolog.query('wumpus_dead(WHAT)')))
+    return bool(list(prolog.query('wumpus_dead')))
+
+
+def current():
+    global rX, rY, rDir
+    c = list(prolog.query("current(X, Y, Dir)"))
+    # print("\nCurrent Position: ", c[0])
+    rX = c[0]['X']
+    rY = c[0]['Y']
+    rDir = c[0]['Dir']
+
+
+def move(A, L):
+    list(prolog.query(f"move({A}, {L})"))
+
+
+def reposition(L):
+    list(prolog.query(f"reposition({L})"))
+
+
+# ACTIONS TESTING - Not actually used for calling
 def localisation():
     global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
     # Confunded
@@ -124,7 +163,6 @@ def localisation():
     c = list(prolog.query(f"stench(X, Y)"))
     print()
     print("Stench at: ", c)
-
 
     # Tingle
     c = list(prolog.query(f"tingle(X, Y)"))
@@ -146,7 +184,6 @@ def localisation():
     print()
     print("Wumpus dead: ", c)
 
-
     # Wumpus Position
     c = list(prolog.query(f"wumpus(X, Y)"))
     print()
@@ -158,61 +195,55 @@ def localisation():
     print("Portal maybe at: ", c)
 
 
-
 # Move Forward
 def move_forward():
-    print("\nMoving Forward")
     c = list(prolog.query("moveforward([off, off, off, off, off, off])"))
+
 
 def turn_left():
     # print("\nTurning Left")
     c = list(prolog.query("turnleft"))
+
 
 def turn_right():
     print("\nTurning Right")
     c = list(prolog.query("turnright"))
 
 
-def test_hasarrow():
-    c = bool(list(prolog.query("hasarrow")))
-    print("\nHas arrow: ", c)
+def pickup():
+    list(prolog.query("pickup"))
+
+
+def has_coin():
+    c = list(prolog.query("has_coin(Result)"))
+    result = (c[0]['Result'] == 'true')
+    # print(result)
+    return result
 
 
 def shoot():
     c = bool(list(prolog.query("shoot")))
-    if(c):
+    if (c):
         print("Shot arrow!")
     else:
         print("Cannot shoot!")
 
-def current():
-    global rX, rY, rDir
-    c = list(prolog.query("current(X, Y, Dir)"))
-    # print("\nCurrent Position: ", c[0])
-    rX = c[0]['X']
-    rY = c[0]['Y']
-    rDir = c[0]['Dir']
-
-
 
 def visited():
-     c = list(prolog.query("visited(X, Y)"))
-     print("\nVisited Cells: ", c)
+    c = list(prolog.query("visited(X, Y)"))
+    print("\nVisited Cells: ", c)
+
 
 def safe():
     c = list(prolog.query("safe(X, Y)"))
     print("\nSafe Cells: ", c)
 
-def move(A, L):
-    list(prolog.query(f"move({A}, {L})"))
 
-def reposition(L):
-    list(prolog.query(f"reposition({L})"))
-
+# -----------------------------------------------
 
 # DRIVER FUNCTIONS
-# Initialisation
 
+# INITIALISATION
 # Get spawnable spots
 def spawn_spots():
     spawns = []
@@ -222,13 +253,14 @@ def spawn_spots():
                 spawns.append((r, c))
     return spawns
 
-# Spawn
+
+# Spawn - Currently has a default spawn location
 def random_spawn():
     global spawnX, spawnY, absX, absY
     # (spawnY, spawnX) = random.choice(spawn_spots())
     spawnY, spawnX = 1, 4
     absY, absX = spawnY, spawnX
-    
+
 
 # random Direction
 def random_direction():
@@ -240,7 +272,7 @@ def random_direction():
             xOffset = -1
         else:
             xOffset = 1
-    
+
     else:
         flipped = False
         if absDir == 'n':
@@ -249,8 +281,10 @@ def random_direction():
         else:
             yOffset = 1
 
+
 # Symbol Populater for default map - made my own modifications
 def populate_helper(absMap, rIndex, cIndex, col):
+    global actual_wumpus, actual_portals, actual_coin
     newRight = cIndex + 1
     newLeft = cIndex - 1
     newUp = rIndex + 1
@@ -258,69 +292,84 @@ def populate_helper(absMap, rIndex, cIndex, col):
     # Confounded
 
     # Stench
-    if col == "W":  
+    if col == "W":
+        actual_wumpus.add((rIndex, cIndex))
         for i in range(9):
-            absMap[rIndex][cIndex][i] = 'W'     
-        # Right
+            absMap[rIndex][cIndex][i] = 'W'
+            # Right
         if (newRight < NUMCOL) and MAP[rIndex][newRight] not in ENTITIES:
             absMap[rIndex][newRight][1] = '='
         # LEFT
-        if (newLeft > 0) and MAP[rIndex][newLeft] not in  ENTITIES:
+        if (newLeft > 0) and MAP[rIndex][newLeft] not in ENTITIES:
             absMap[rIndex][newLeft][1] = '='
         # Right
-        if (newUp < NUMROW) and MAP[newUp][cIndex] not in  ENTITIES:
+        if (newUp < NUMROW) and MAP[newUp][cIndex] not in ENTITIES:
             absMap[newUp][cIndex][1] = '='
         # Right
-        if (newDown > 0) and MAP[newDown][cIndex] not in  ENTITIES:
+        if (newDown > 0) and MAP[newDown][cIndex] not in ENTITIES:
             absMap[newDown][cIndex][1] = '='
 
     # Tingle
-    elif col == "P":       
+    elif col == "P":
+        actual_portals.add((rIndex, cIndex))
         for i in range(9):
             absMap[rIndex][cIndex][i] = 'P'
         # Right
-        if (newRight < NUMCOL) and MAP[rIndex][newRight] not in  ENTITIES:
+        if (newRight < NUMCOL) and MAP[rIndex][newRight] not in ENTITIES:
             absMap[rIndex][newRight][2] = 'T'
         # LEFT
-        if (newLeft > 0) and MAP[rIndex][newLeft] not in  ENTITIES:
+        if (newLeft > 0) and MAP[rIndex][newLeft] not in ENTITIES:
             absMap[rIndex][newLeft][2] = 'T'
         # Right
-        if (newUp < NUMROW) and MAP[newUp][cIndex] not in  ENTITIES:
+        if (newUp < NUMROW) and MAP[newUp][cIndex] not in ENTITIES:
             absMap[newUp][cIndex][2] = 'T'
         # Right
-        if (newDown > 0) and MAP[newDown][cIndex] not in  ENTITIES:
+        if (newDown > 0) and MAP[newDown][cIndex] not in ENTITIES:
             absMap[newDown][cIndex][2] = 'T'
 
     elif col == "C":
+        actual_coin.add((rIndex, cIndex))
+        if not has_coin():
+            # print('\nPlacing Coin..')
             # for i in range(9):
-                absMap[rIndex][cIndex][6] = '*'       
-
+            absMap[rIndex][cIndex][6] = '*'
+        else:
+            absMap[rIndex][cIndex][6] = '.'
 
     # Scream
     # Walls
     if col == '#':
         for i in range(9):
             absMap[rIndex][cIndex][i] = '#'
-    
 
 
+# ----------------------------
+
+# WORLD MAP
 def create_abs_map():
     global absMap
-    
     for (rIndex, row) in enumerate(MAP):
         for (cIndex, col) in enumerate(row):
             populate_helper(absMap, rIndex, cIndex, col)
 
+
 def print__map():
+    global absMap
+    print("\n" + '#' * 16 + " ACTUAL MAP " + '#' * 16 + "\n")
     for z in range(7):
         for j in range(3):
             for col in absMap[z]:
                 for i in range(3):
-                    print(col[i + j*3], end='')
+                    print(col[i + j * 3], end='')
                 print(' | ', end='')
             print()
-        print('-'*35)
+        print('-' * 35)
+    print('#' * 46)
 
+
+# ----------------------------
+
+# PRINT AGENT'S MAP FUNCTIONS
 def set_abs_agent_location():
     global absX, absY, absDir, agent_abs_map, senses
     facing = ''
@@ -336,33 +385,28 @@ def set_abs_agent_location():
     agent_abs_map[absY][absX][5] = '-'
     agent_abs_map[absY][absX][4] = facing
 
-
     # set senses
     for i, el in enumerate(senses):
-        if(el == 'on'):
-            if(i == 0):
+        if (el == 'on'):
+            if (i == 0):
                 agent_abs_map[absY][absX][0] = '%'
-            elif(i == 1):
+            elif (i == 1):
                 agent_abs_map[absY][absX][1] = '='
-            elif(i == 2):
+            elif (i == 2):
                 agent_abs_map[absY][absX][2] = 'T'
-            elif(i == 3):
+            elif (i == 3):
                 agent_abs_map[absY][absX][6] = '*'
-            elif(i == 4):
+            elif (i == 4):
                 agent_abs_map[absY][absX][7] = 'B'
-            elif(i == 5):
+            elif (i == 5):
                 agent_abs_map[absY][absX][8] = '@'
-
-    
-
-
 
 
 def update_absolute_agent_map():
     global agent_abs_map, stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos
-    agent_abs_map = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW) ]
+    agent_abs_map = [[['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW)]
     for (y, x) in wumpus_pos:
-        if  (y, x) not in portal_pos:
+        if (y, x) not in portal_pos:
             agent_abs_map[y][x][5] = '-'
             agent_abs_map[y][x][3] = '-'
             agent_abs_map[y][x][4] = 'W'
@@ -378,15 +422,18 @@ def update_absolute_agent_map():
     # Set safe/visited cells
     for (y, x) in safe_pos:
         agent_abs_map[y][x][4] = 's'
-    
+
     for (y, x) in visited_pos:
         agent_abs_map[y][x][4] = 'S'
+
+    for (y, x) in glitter_pos:
+        # if not has_coin():
+        agent_abs_map[y][x][6] = '*'
 
     # Set walls
     for (y, x) in wall_pos:
         for i in range(9):
             agent_abs_map[y][x][i] = '#'
-
 
     # Set absolute agent position and senses
     set_abs_agent_location()
@@ -395,26 +442,26 @@ def update_absolute_agent_map():
 def print_Absolute_Map():
     global agent_abs_map
     update_absolute_agent_map()
-       
-    print()
-    
+    print('#' * 12 + " AGENT'S ABSOLUTE MAP " + '#' * 12 + "\n")
     # Printing the default map - made my own modifications
     for z in range(7):
         for j in range(3):
             for col in agent_abs_map[z]:
                 for i in range(3):
-                    print(col[i + j*3], end='')
+                    print(col[i + j * 3], end='')
                 print(' | ', end='')
             print()
-        print('-'*35)
+        print('-' * 35)
+
+    print("\n" + '#' * 46)
 
 
-
+# ----------------------------
 
 def pretend_moveforward():
     global rX, rY, rDir
-    newX, newY  = rX, rY
-    if(rDir == 'rnorth'):
+    newX, newY = rX, rY
+    if (rDir == 'rnorth'):
         newY += 1
     elif rDir == 'rsouth':
         newY -= 1
@@ -425,79 +472,109 @@ def pretend_moveforward():
 
     return newY, newX
 
+
+# Convert relative to absolute coords
 def get_abs_coord(relativeXY):
     if not flipped:
-        return spawnY + yOffset*relativeXY[0], spawnX - yOffset*relativeXY[1]
+        return spawnY + yOffset * relativeXY[0], spawnX - yOffset * relativeXY[1]
     else:
-        return spawnY + xOffset*relativeXY[1], spawnX + xOffset * relativeXY[0]
+        return spawnY + xOffset * relativeXY[1], spawnX + xOffset * relativeXY[0]
+
 
 def redefine_abs_coord():
     global absX, absY, rX, rY, spawnX, spawnY
     current()
     absY, absX = get_abs_coord((rY, rX))
-    
+
+
 def update_current_senses():
     global senses, absMap, absX, absY, first_start
-    senses = ["off", "off", "off", "off", "off", "off"] 
+    senses = ["off", "off", "off", "off", "off", "off"]
     # Confounded??
-    if(first_start == 0):
+    if (first_start == 0):
         senses[0] = 'on'
-
     # Turn on stench
-    if(absMap[absY][absX][1] == '='):
+    if (absMap[absY][absX][1] == '='):
         senses[1] = 'on'
     # Turn on tingle
-    if(absMap[absY][absX][2] == 'T'):
+    if (absMap[absY][absX][2] == 'T'):
         senses[2] = 'on'
     # Turn on glitter
-    if(absMap[absY][absX][6] == '*'):
+    if (absMap[absY][absX][6] == '*'):
         senses[3] = 'on'
-    # Turn on scream??
-    # if(absMap[newY][newX][1] == 'T'):
-    #     senses[1] = 'on'
 
 
-# Linking agent and driver functions
+# Used with move forward to see if agent bumps into wall
 def get_next_senses():
     global senses, absMap
     current()
     newY, newX = get_abs_coord(pretend_moveforward())
     # If bump, all senses remain the same except bump turned on
-    if(absMap[newY][newX][1] == '#'):
+    if (absMap[newY][newX][1] == '#'):
         senses[4] = 'on'
         return
 
-    senses = ["off", "off", "off", "off", "off", "off"] 
-    
-
-    # Confounded??
-    # if(absMap[newY][newX][1] == 'T'):
-    #     senses[1] = 'on'
+    senses = ["off", "off", "off", "off", "off", "off"]
 
     # Turn on stench
-    if(absMap[newY][newX][1] == '='):
+    if (absMap[newY][newX][1] == '='):
         senses[1] = 'on'
     # Turn on tingle
-    if(absMap[newY][newX][2] == 'T'):
+    if (absMap[newY][newX][2] == 'T'):
         senses[2] = 'on'
     # Turn on glitter
-    if(absMap[newY][newX][6] == '*'):
+    if (absMap[newY][newX][6] == '*'):
         senses[3] = 'on'
-    # Turn on scream??
-    # if(absMap[newY][newX][1] == 'T'):
-    #     senses[1] = 'on'
 
 
+# CHECK FOR ARROW FIRED - IF WUMPUS IS DEAD
+def facing_wumpus():
+    global absX, absY, absDir, actual_wumpus
 
-# TO DO
+    for (y, x) in actual_wumpus:
+        print(y, x)
+        print(absY, absX)
+        # If same col
+        if x == absX:
+            # Check if agent above or below
+            # Wumpus Below, so agent shd face south
+            if y > absY:
+                if absDir == 's':
+                    return True
+            else:
+                if absDir == 'n':
+                    return True
+        # OR IF SAME ROW
+        elif y == absY:
+            if x > absX:
+                # Wumpus To the right, so agent shd face east
+                if absDir == 'e':
+                    return True
+            else:
+                if absDir == 'w':
+                    return True
+
+    return False
+
+
+# Function to check if wumpus got killed after shooting
+def check_if_wumpus_killed():
+    global senses
+    if facing_wumpus():
+        senses[5] = 'on'
+
+
+# ----------------------------
+
+
+# Update driver's knowledge of Agent's knowledge.. lmao
 def query_agent():
-    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos 
+    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
     # Reset all sets:
     wumpus_pos = set()
     portal_pos = set()
     safe_pos = set()
-
-
+    glitter_pos = set()
 
     # print("Stench: ", stench_at())
     for sol in stench_at():
@@ -517,17 +594,17 @@ def query_agent():
     # print("Walls: ", wall_at())
     for sol in wall_at():
         wall_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("WALLS POS: ", wall_pos)
+    # print("WALLS POS: ", wall_pos)
 
     # print("Wumpus: ", wumpus_at())
     for sol in wumpus_at():
         wumpus_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("WUMPUS POS: ", wumpus_pos)
+    # print("WUMPUS POS: ", wumpus_pos)
 
     # print("Portal: ", portal_at())
     for sol in portal_at():
         portal_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("PORTAL POS: ", portal_pos)
+    # print("PORTAL POS: ", portal_pos)
 
     # print("Visited: ", visited_at())
     for sol in visited_at():
@@ -537,21 +614,54 @@ def query_agent():
     # print("Safe: ", safe_at())
     for sol in safe_at():
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("SAFE POS: ", safe_pos)
+    # print("SAFE POS: ", safe_pos)
 
     # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
     tmp = set()
     for sol in confirm_not_wumpus_at():
         tmp.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("NOT WUMPUS POS: ", tmp)
+    # print("NOT WUMPUS POS: ", tmp)
 
     tmp = set()
     for sol in confirm_not_portal_at():
         tmp.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("NOT PORTAL POS: ", tmp)
+    # print("NOT PORTAL POS: ", tmp)
 
-    
 
+def print_senses():
+    global senses
+
+    if senses[0] == "on":
+        print("Confounded-", end='')
+    else:
+        print("C-", end="")
+
+    if senses[1] == "on":
+        print("Stench-", end='')
+    else:
+        print("S-", end="")
+
+    if senses[2] == "on":
+        print("Tingle-", end='')
+    else:
+        print("T-", end="")
+
+    if senses[3] == "on":
+        print("Glitter-", end='')
+    else:
+        print("G-", end="")
+
+    if senses[4] == "on":
+        print("Bump-", end='')
+    else:
+        print("B-", end="")
+
+    if senses[5] == "on":
+        print("Scream")
+    else:
+        print("S")
+
+    print()
 
 
 def update_all():
@@ -559,30 +669,26 @@ def update_all():
     query_agent()
 
 
-
-
-
 def controls():
-    print__map()
-    print_Absolute_Map()
-    global absDir, rX, rY, rDir, first_start, senses
+    global absDir, rX, rY, rDir, senses
+
     choice = 1
-    first_start = 1
     while choice != 6:
-        print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
+        # print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
-            1) Move Forward
-            2) Turn Left
-            3) Turn Right
-            4) Pick Up Coin
-            5) Shoot
-                ''')
+Pick an action for the agent:
+1) Move Forward
+2) Turn Left
+3) Turn Right
+4) Pick Up Coin
+5) Shoot
+''')
         choice = int(input("Choice: "))
         if choice == 1:
             print("Attempting to move forward...")
-            # Check if front is a wall
-            get_next_senses()            
-            print(senses)
+            # Check if forward is wall
+            get_next_senses()
+
             # print(bool(list(prolog.query(f"moveforward({senses})"))))
             move('moveforward', senses)
             move("turnright", senses)
@@ -590,93 +696,99 @@ def controls():
             # update_current_senses()
 
         elif choice == 2:
-            # turn_left()  
-            print(senses)
-
+            # turn_left()
             update_current_senses()
             move("turnleft", senses)
-            absDir = DIRECTIONS[(DIRECTIONS.index(absDir)-1)%4]
+            absDir = DIRECTIONS[(DIRECTIONS.index(absDir) - 1) % 4]
             print("Turning Left")
-        
+
         elif choice == 3:
             # turn_right()
             update_current_senses()
             move("turnright", senses)
-            absDir = DIRECTIONS[(DIRECTIONS.index(absDir)+1)%4]
+            absDir = DIRECTIONS[(DIRECTIONS.index(absDir) + 1) % 4]
             print("Turning Right")
-        
+
         elif choice == 4:
             update_current_senses()
             print("Attempting to pick up coin...")
-        
+            move("pickup", senses)
+            create_abs_map()
+            update_current_senses()
+
+
+
         elif choice == 5:
             update_current_senses()
-            print("Attempting to shot arrow...")
 
-        print("BEFORE")
+            print("Attempting to shoot arrow...")
+
+            # Check if has arrow
+            if hasarrow():
+                # Check if wumpus in direction of arrow shot and is killed
+                check_if_wumpus_killed()
+                print(senses)
+                move("shoot", senses)
+                # print("WUMPUS DEAD: ", wumpus_dead())
+            else:
+                print("No arrows to shoot")
+        else:
+            "Invalid Option!"
+            continue
+
         update_all()
+        # Check if entered wumpus cell
+        if (absY, absX) in actual_wumpus and not wumpus_dead():
+            print("Oops... Agent has been devoured! Game Over!")
+            break
 
-        print("AFTER")
-        print__map()
-        print_Absolute_Map()
-        
-        
+        # check if entered portal
+        elif (absY, absX) in actual_portals:
+            print("Entered Portal. Repositioning...")
+            world_reposition()
 
-    # Check if entered portal or WUMPUS
+        # Else
+        else:
+            # print__map()
+            print("Senses after action: ", end='')
+            print_senses()
+            print_Absolute_Map()
+
+
+def world_reposition():
+    global senses, first_start
+    first_start = 0
+    # Initialise Agent
+    random_spawn()
+    random_direction()
+    reset_all_positions()
+    update_current_senses()
+    reposition(senses)
+    update_all()
+
+    print_Absolute_Map()
+    print("Current Senses: ", end='')
+    print_senses()
+    first_start = 1
 
 
 def start_wumpus():
+    # Set Agent start and print initial map
     reborn()
     create_abs_map()
-    random_spawn()
-    random_direction()
-    update_current_senses()
+    print__map()
+
+    # Call reposition
+    world_reposition()
+
+    # Loop controls
+    controls()
 
 
+# Start Game
 start_wumpus()
 
-controls()
-
-# print("WUMPUS: ", wumpus_at())
 
 
-# reborn()
-# testShooting()
-# testPickup()
-# test_hasarrow()
-# shoot()
-# test_hasarrow()
-# shoot()
-# testMoveForward()
-
-# current()
-# visited()
-# move_forward()
-# current()
-# turn_right()
-# current()
-# move_forward()
-# current()
-# move_forward()
-# current()
-# turn_left()
-# current()
-
-# move("moveforward", ["off", "off", "off", "off", "off", "off"])
-# visited()
-# # safe()
-# move("moveforward", ["off", "on", "off", "off", "off", "off"])
-# visited()
-# safe()
-
-# move("moveforward", ["on", "off", "off", "off", "off", "off"])
-
-# print("After confounded")
-# reposition(["on", "on", "on", "on", "off", "off"])
-
-# visited()
-# safe()
-
-# localisation()
 
 

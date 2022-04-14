@@ -21,6 +21,7 @@ visited/2,
 reposition/1,
 wumpus/2,
 portal/2,
+% Updated as at 13/4/2021
 update_safe/2,
 remove_all_in_wall/2,
 confirm_not_wumpus/2,
@@ -45,25 +46,28 @@ reborn:-
     retractall(relative_position(_, _)),
     retractall(wall(_, _)),
 
+    retractall(comfirm_not_wumpus(_, _)),
+    retractall(comfirm_not_portal(_, _)),
 
-
+    % Not to be reset in reposition-----
     assert(has_coin(false)),
     assert(fired(false)),
     assert(wumpus_dead(false)),
-    assert(confounded(true)),
+    % ----------------------------------
+
+
     assert(safe(0,0)),
     assert(visited(0,0)),
-    
     assert(direction(rnorth)),
     assert(relative_position(0, 0)).
-    
-    
+
+
 
 reposition(L):-
         retractall(visited(_, _)),
         retractall(wumpus(_, _)),
-        retractall(confounded(_)),
         retractall(portal(_, _)),
+        retractall(confounded(_)),
         retractall(tingle(_, _)),
         retractall(glitter(_, _)),
         retractall(stench(_, _)),
@@ -72,11 +76,15 @@ reposition(L):-
         retractall(relative_position(_, _)),
         retractall(wall(_, _)),
 
-        assert(direction(rnorth)),
-        assert(relative_position(0, 0)),
+        retractall(comfirm_not_wumpus(_, _)),
+        retractall(comfirm_not_portal(_, _)),
+
+
         assert(safe(0,0)),
         assert(visited(0,0)),
-        percept(0,0, L).
+        assert(direction(rnorth)),
+        assert(relative_position(0, 0)),
+        percept(L).
 
 retract_portal_wumpus(X, Y) :-
     portal(X, Y), wumpus(X, Y) -> retract(portal(X, Y)), retract(wumpus(X, Y));
@@ -87,7 +95,7 @@ retract_portal_wumpus(X, Y) :-
 
 % No wall
 moveforward([_, _, _, _, B, _]) :-
-    B == off, current(CurX, CurY, CurDir), retractall(relative_position(_, _)),  
+    B == off, current(CurX, CurY, CurDir), retractall(relative_position(_, _)),
     (
         ((CurDir == rnorth, NewY is CurY + 1) -> assert(relative_position(CurX, NewY)));
         % Go Relative Right
@@ -121,13 +129,14 @@ remove_all_in_wall(X, Y) :-
 
 % Pick up
 pickup([_, _, _, G|_]) :-
-    G == on, assert(has_coin(true)).
+    current(X, Y, _),
+    G == on, retract(has_coin(false)), retract(glitter(X, Y)), assert(has_coin(true)).
 
 
 % Fire arrow
 shoot :-
     hasarrow, retractall(fired(_)), assert(fired(true)).
-    
+
 
 % Turn left
 turnleft :-
@@ -158,18 +167,19 @@ move(A, L) :-
 move(A, L) :-
     A == pickup, pickup(L).
 
-
 move(A, L) :-
     A == turnleft, turnleft, percept(L).
 
 move(A, L) :-
     A == turnright, turnright, percept(L).
 
+move(A, L) :-
+    A == shoot, shoot, percept(L).
+
 % Percept Confundus
-percept([C, S, T, G, _, Sc]) :-
+percept([_, S, T, G, _, Sc]) :-
     current(X, Y, CurDir), (
-    % Confundus?
-    (C == on, (\+confounded(true), (assert(confounded(true)))));
+
     % Stench?
     (S == on, (\+stench(X, Y), assert(stench(X, Y))));
     % Tingle?
@@ -179,11 +189,16 @@ percept([C, S, T, G, _, Sc]) :-
     % Bump? - Handled in moveforward
     % (B == on, (\+wall(X, Y), assert(wall(X, Y)))));
     % Scream?
-    (Sc == on, (\+wumpus_dead(true), assert(wumpus_dead(true))))
+    (Sc == on, assert(wumpus_dead(true)), retract(wumpus_dead(false)))
     ).
 
 
 
+
+percept([C|_]) :-
+    % Confundus?
+    C == on -> \+confounded(true), (assert(confounded(true)));
+    C == off ->  confounded(true), retract(confounded(true)).
 
 percept([_, S, T|_]) :-
     current(X, Y, CurDir),
@@ -198,11 +213,25 @@ percept([_, S, T|_]) :-
         )
     ).
 
+percept([_, S, T|_]) :-
+    current(X, Y, CurDir),
+    S == on, T == off, wumpus_dead,
+    (
+        UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+        (
+            (\+wall(X, UpY), \+safe(X, UpY), assert(safe(X, UpY)), retract_portal_wumpus(X, UpY));
+            (\+wall(X, DownY), \+safe(X, DownY), assert(safe(X, DownY)), retract_portal_wumpus(X, DownY));
+            (\+wall(UpX, Y), \+safe(UpX, Y), assert(safe(UpX, Y)), retract_portal_wumpus(UpX, Y));
+            (\+wall(DownX, Y), \+safe(DownX, Y), assert(safe(DownX, Y)), retract_portal_wumpus(DownX, Y))
+        )
+    ).
+
+
 percept([_, S|_]) :-
     current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
         (
-            S == off, 
-            (           
+            S == off,
+            (
                 (\+confirm_not_wumpus(X, UpY), assert(confirm_not_wumpus(X, UpY)), retract(wumpus(X, UpY)));
                 (\+confirm_not_wumpus(X, DownY), assert(confirm_not_wumpus(X, DownY)), retract(wumpus(X, DownY)));
                 (\+confirm_not_wumpus(UpX, Y), assert(confirm_not_wumpus(UpX, Y)), retract(wumpus(UpX, Y)));
@@ -216,22 +245,21 @@ percept([_, S|_]) :-
 percept([_, S|_]) :-
     current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
     (
-        S == on, 
-        (           
-            (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus(X, UpY), assert(wumpus(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y), \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
+        S == on,
+        (
+            (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus_dead, \+wumpus(X, UpY), assert(wumpus(X, UpY)));
+            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus_dead, \+wumpus(X, DownY), assert(wumpus(X, DownY)));
+            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y),\+wumpus_dead, \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus_dead, \+wumpus(DownX, Y), assert(wumpus(DownX, Y)))
         )
     ).
-
 
 
 percept([_, _, T|_]) :-
     current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
         (
-            T == off, 
-            (           
+            T == off,
+            (
                 (\+confirm_not_portal(X, UpY), assert(confirm_not_portal(X, UpY)), retract(portal(X, UpY)));
                 (\+confirm_not_portal(X, DownY), assert(confirm_not_portal(X, DownY)), retract(portal(X, DownY)));
                 (\+confirm_not_portal(UpX, Y), assert(confirm_not_portal(UpX, Y)), retract(portal(UpX, Y)));
@@ -241,43 +269,17 @@ percept([_, _, T|_]) :-
 
 percept([_, _, T|_]) :-
     current(X, Y, CurDir), UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
-    
+
     (
         T == on,
         (
             (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_portal(X, UpY), \+portal(X, UpY), assert(portal(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_portal(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));            
+            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_portal(X, DownY), \+portal(X, DownY), assert(portal(X, DownY)));
             (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_portal(DownX, Y), \+portal(DownX, Y),  assert(portal(DownX, Y)));
             (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_portal(UpX, Y), \+portal(UpX, Y), assert(portal(UpX, Y)))
         )
 
     ).
-
-
-
-
-
-
-% Maybe Wumpus
-% wumpus(X, Y) :-
-%     stench(X, Y) X is X+1, Y is Y + 1.
-% current(X, Y),
-%     UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wall(X, Y), \+safe(X, Y),
-%     (stench(X, UpY); stench(X, DownY); stench(UpX, Y); stench(DownX, Y)), assert(wumpus(X, Y)).
-
-% Maybe Portal
-% portal(X, Y) :-
-%     tingle(TX, TY),
-%     (UpY is TY+1, DownY is TY-1, UpX is TX+1, DownX is TX-1),
-%     (
-%         \+wall(UpX, TY), \+safe(UpX, TY), assert(portal(UpX, TY));
-%         \+wall(DownX, TY), \+safe(DownX, TY), assert(portal(DownX, TY));
-%         \+wall(TX, DownY), \+safe(TX, DownY), assert(portal(TX, DownY));
-%         \+wall(TX, UpY), \+safe(TX, UpY), assert(portal(TX, UpY));
-%    ).
-    % (tingle(X, UpY); tingle(X, DownY); tingle(UpX, Y); tingle(DownX, Y)), assert(portal(X, Y)).
-
-
 
 % has arrow
 hasarrow :-
@@ -286,11 +288,19 @@ hasarrow :-
 current(X, Y, Dir) :-
     relative_position(X, Y), direction(Dir).
 
+
+wumpus_dead :-
+    wumpus_dead(true), retractall(wumpus(_, _)).
+
+confounded :-
+    confounded(true).
+
 explore(L) :-
     current(X, Y, Dir), CurX = X, CurY = Y,
     (
-           ( glitter(CurX, CurY), L = pickup([X, Y, Dir, G|_]) ); %I'm not sure how to let L be the pickup action
-
-    )
-
-
+           ( glitter(CurX, CurY) -> L = pickup([X, Y, Dir, G|_]) ), %I'm not sure how to let L be the pickup action
+           ( tingle(CurX, CurY)-> L = ),
+           ( stench(CurX, CurY) -> L = ),
+           ( (tingle(CurX, CurY), stench(CurX, CurY)) -> L =),
+           ( safe(CurX, CurY) -> L = moveforward)
+    ).
