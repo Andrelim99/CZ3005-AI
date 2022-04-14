@@ -65,8 +65,26 @@ wall_pos = set()
 safe_pos = set()
 visited_pos = set()
 
+
+r_stench_pos = set()
+r_tingle_pos = set()
+r_glitter_pos = set()
+r_wumpus_pos = set()
+r_portal_pos = set()
+r_wall_pos = set()
+r_safe_pos = set()
+r_visited_pos = set()
+
+r_map_rows = 3
+r_map_cols = 3
+
+r_x_offset = 1
+r_y_offset = 1
+
 def reset_all_positions():
     global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos 
+    global r_stench_pos, r_tingle_pos, r_glitter_pos, r_wumpus_pos, r_portal_pos, r_wall_pos, r_safe_pos, r_visited_pos
+    global r_map_cols, r_map_rows, r_x_offset, r_y_offset
     stench_pos = set()
     tingle_pos = set()
     glitter_pos = set()
@@ -75,6 +93,21 @@ def reset_all_positions():
     wall_pos = set()
     safe_pos = set()
     visited_pos = set()
+
+    r_stench_pos = set()
+    r_tingle_pos = set()
+    r_glitter_pos = set()
+    r_wumpus_pos = set()
+    r_portal_pos = set()
+    r_wall_pos = set()
+    r_safe_pos = set()
+    r_visited_pos = set()
+
+    r_map_rows = 3
+    r_map_cols = 3
+
+    r_x_offset = 1
+    r_y_offset = 1
 
 # AGENT FUNCTIONS
 # Reborn to reset agent
@@ -342,7 +375,7 @@ def print__map():
     print('#'*46)
 # ----------------------------
 
-# PRINT AGENT'S MAP FUNCTIONS
+# PRINT AGENT'S ABSOLUTE MAP FUNCTIONS
 def set_abs_agent_location():
     global absX, absY, absDir, agent_abs_map, senses
     facing = ''
@@ -434,6 +467,138 @@ def print_Absolute_Map():
     print("\n"+'#'*46)
 
 # ----------------------------
+# PRINT AGENT'S RELATIVE MAP FUNCTIONS - TO DO!
+agent_relative_map = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(r_map_cols)] for a in range(r_map_rows) ]
+
+def recalulate_numRC():
+    global r_map_rows, r_map_cols, rY, rX
+    print("ENTERED")
+    if (rY, rX) in r_visited_pos or (rY, rX) == (0, 0):
+        return
+
+    if rDir == 'rnorth' or rDir == 'rsouth':
+        r_map_rows += 2
+
+    else:
+        r_map_cols += 2
+
+def calulate_r_offset():
+    global r_y_offset, r_x_offset
+    r_y_offset = int(r_map_rows/2)
+    r_x_offset = int(r_map_cols/2)
+
+
+def calculate_r_postion(y, x):
+    return r_y_offset - y, x + r_x_offset
+
+
+def set_relative_agent_location():
+    global rX, rY, rDir, agent_relative_map, senses
+    y, x = calculate_r_postion(rY, rX)
+    facing = ''
+    if rDir == 'rnorth':
+        facing = '∧'
+    elif rDir == 'rsouth':
+        facing = '∨'
+    elif rDir == 'reast':
+        facing = '>'
+    else:
+        facing = '<'
+    agent_relative_map[y][x][3] = '-'
+    agent_relative_map[y][x][5] = '-'
+    agent_relative_map[y][x][4] = facing
+
+
+    # set senses
+    for i, el in enumerate(senses):
+        if(el == 'on'):
+            if(i == 0):
+                agent_relative_map[y][x][0] = '%'
+            elif(i == 1):
+                agent_relative_map[y][x][1] = '='
+            elif(i == 2):
+                agent_relative_map[y][x][2] = 'T'
+            elif(i == 3):
+                agent_relative_map[y][x][6] = '*'
+            elif(i == 4):
+                agent_relative_map[y][x][7] = 'B'
+            elif(i == 5):
+                agent_relative_map[y][x][8] = '@'
+
+
+def update_relative_agent_map():
+    global r_map_cols, r_map_rows, agent_relative_map, r_stench_pos, r_tingle_pos, r_glitter_pos, r_wumpus_pos, r_portal_pos, r_wall_pos, r_safe_pos, r_visited_pos
+    agent_relative_map = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(r_map_cols)] for a in range(r_map_rows) ]
+    for (y, x) in r_wumpus_pos:
+        if  (y, x) not in r_portal_pos:
+            y, x = calculate_r_postion(y, x)
+            agent_relative_map[y][x][5] = '-'
+            agent_relative_map[y][x][3] = '-'
+            agent_relative_map[y][x][4] = 'W'
+        else:
+            y, x = calculate_r_postion(y, x)
+            agent_relative_map[y][x][5] = '-'
+            agent_relative_map[y][x][3] = '-'
+            agent_relative_map[y][x][4] = 'U'
+
+    for (y, x) in r_portal_pos:
+        if (y, x) not in r_wumpus_pos:
+            y, x = calculate_r_postion(y, x)
+            agent_relative_map[y][x][4] = 'O'
+
+    # Set safe/visited cells
+    for (y, x) in r_safe_pos:
+        y, x = calculate_r_postion(y, x)
+        # print(y,x)
+        agent_relative_map[y][x][4] = 's'
+    
+    for (y, x) in r_visited_pos:
+        y, x = calculate_r_postion(y, x)
+        agent_relative_map[y][x][4] = 'S'
+
+    for (y, x) in r_glitter_pos:
+        # if not has_coin():
+        y, x = calculate_r_postion(y, x)
+        agent_relative_map[y][x][6] = '*'
+
+        
+
+
+    # Set walls
+    for (y, x) in r_wall_pos:
+        print("Before Relative: ", y, x)
+        
+        y, x = calculate_r_postion(y, x)
+        print("After Relative: ", y, x)
+        for i in range(9):
+            agent_relative_map[y][x][i] = '#'
+
+
+    # Set absolute agent position and senses
+    set_relative_agent_location()
+
+
+def print_Relative_Map():
+    global agent_relative_map, r_map_rows
+    update_relative_agent_map()
+    print('#'*12 + " AGENT'S RELATIVE MAP " + '#'*12 +"\n")
+    # Printing the default map - made my own modifications
+    for z in range(r_map_rows):
+        for j in range(3):
+            for col in agent_relative_map[z]:
+                for i in range(3):
+                    print(col[i + j*3], end='')
+                print('  ', end='')
+            print()
+        # print('-'*35)
+        print()
+
+    print("\n"+'#'*46)
+
+
+
+# ----------------------------
+
 
 def pretend_moveforward():
     global rX, rY, rDir
@@ -543,64 +708,78 @@ def check_if_wumpus_killed():
 
 # Update driver's knowledge of Agent's knowledge.. lmao
 def query_agent():
-    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos 
+    global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
+    global r_stench_pos, r_tingle_pos, r_glitter_pos, r_wumpus_pos, r_portal_pos, r_wall_pos, r_safe_pos, r_visited_pos
     # Reset all sets:
     wumpus_pos = set()
     portal_pos = set()
     safe_pos = set()
     glitter_pos = set()
 
+    r_wumpus_pos = set()
+    r_portal_pos = set()
+    r_safe_pos = set()
+    r_glitter_pos = set()
+
 
 
     # print("Stench: ", stench_at())
     for sol in stench_at():
+        r_stench_pos.add((sol['Y'], sol['X']))
         stench_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("STENCH POS: ", stench_pos)
 
     # print("Tingle: ", tingle_at())
     for sol in tingle_at():
+        r_tingle_pos.add((sol['Y'], sol['X']))
         tingle_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("TINGLE POS: ", tingle_pos)
 
     # print("Glitter: ", glitter_at())
     for sol in glitter_at():
+        r_glitter_pos.add((sol['Y'], sol['X']))
         glitter_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("GLITTER POS: ", glitter_pos)
 
     # print("Walls: ", wall_at())
     for sol in wall_at():
+        r_wall_pos.add((sol['Y'], sol['X']))
         wall_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("WALLS POS: ", wall_pos)
 
     # print("Wumpus: ", wumpus_at())
     for sol in wumpus_at():
+        r_wumpus_pos.add((sol['Y'], sol['X']))
         wumpus_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("WUMPUS POS: ", wumpus_pos)
 
     # print("Portal: ", portal_at())
     for sol in portal_at():
+        r_portal_pos.add((sol['Y'], sol['X']))
         portal_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("PORTAL POS: ", portal_pos)
 
     # print("Visited: ", visited_at())
     for sol in visited_at():
+        r_visited_pos.add((sol['Y'], sol['X']))
         visited_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("VISITED POS: ", visited_pos)
 
     # print("Safe: ", safe_at())
     for sol in safe_at():
+        r_safe_pos.add((sol['Y'], sol['X']))
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("SAFE POS: ", safe_pos)
 
     # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
-    tmp = set()
-    for sol in confirm_not_wumpus_at():
-        tmp.add((get_abs_coord((sol['Y'], sol['X']))))
+    # tmp = set()
+    # for sol in confirm_not_wumpus_at():
+    #     tmp.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("NOT WUMPUS POS: ", tmp)
 
-    tmp = set()
-    for sol in confirm_not_portal_at():
-        tmp.add((get_abs_coord((sol['Y'], sol['X']))))
+    # tmp = set()
+    # for sol in confirm_not_portal_at():
+    #     tmp.add((get_abs_coord((sol['Y'], sol['X']))))
     # print("NOT PORTAL POS: ", tmp)
 
     
@@ -643,6 +822,9 @@ def print_senses():
 
 def update_all():
     redefine_abs_coord()
+    recalulate_numRC()
+    calulate_r_offset()
+
     query_agent()
 
 
@@ -733,6 +915,7 @@ Pick an action for the agent:
             print("Senses after action: ", end='')
             print_senses()
             print_Absolute_Map()
+            print_Relative_Map()
             
         
 
@@ -747,7 +930,9 @@ def world_reposition():
     reposition(senses)
     update_all()
     
-    print_Absolute_Map()   
+    
+    print_Absolute_Map()
+    print_Relative_Map()   
     print("Current Senses: ", end='')
     print_senses()
     first_start = 1
