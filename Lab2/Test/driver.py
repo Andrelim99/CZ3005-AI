@@ -21,7 +21,7 @@ MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
        ['#', '', '', '', '', '#'],      #1
        ['#', '', 'P', '', '', '#'],    #2
-       ['#', '', '', 'W', 'C', '#'],    #3
+       ['#', '', '#', 'W', 'C', '#'],    #3
        ['#', '', '', '', '', '#'],      #4
        ['#', '', 'P', '', '', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
@@ -346,6 +346,7 @@ def create_abs_map():
 
 def print__map():
     global absMap
+    print("\n"+'#'*16 + " ACTUAL MAP " + '#'*16 +"\n")
     for z in range(7):
         for j in range(3):
             for col in absMap[z]:
@@ -354,6 +355,7 @@ def print__map():
                 print(' | ', end='')
             print()
         print('-'*35)
+    print('#'*46)
 
 def set_abs_agent_location():
     global absX, absY, absDir, agent_abs_map, senses
@@ -432,9 +434,7 @@ def update_absolute_agent_map():
 def print_Absolute_Map():
     global agent_abs_map
     update_absolute_agent_map()
-       
-    print()
-    
+    print('#'*12 + " AGENT'S ABSOLUTE MAP " + '#'*12 +"\n")
     # Printing the default map - made my own modifications
     for z in range(7):
         for j in range(3):
@@ -445,7 +445,7 @@ def print_Absolute_Map():
             print()
         print('-'*35)
 
-
+    print("\n"+'#'*46)
 
 
 def pretend_moveforward():
@@ -675,15 +675,15 @@ def controls():
 
     choice = 1
     while choice != 6:
-        is_confounded()
         # print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
-            1) Move Forward
-            2) Turn Left
-            3) Turn Right
-            4) Pick Up Coin
-            5) Shoot
-                ''')
+Pick an action for the agent:
+1) Move Forward
+2) Turn Left
+3) Turn Right
+4) Pick Up Coin
+5) Shoot
+''')
         choice = int(input("Choice: "))
         if choice == 1:
             print("Attempting to move forward...")
@@ -733,6 +733,9 @@ def controls():
                 # print("WUMPUS DEAD: ", wumpus_dead())
             else:
                 print("No arrows to shoot")
+        else:
+            "Invalid Option!"
+            continue
 
         update_all()
         # Check if entered wumpus cell
@@ -747,9 +750,11 @@ def controls():
 
         # Else
         else:        
-            print__map()
-            print_Absolute_Map()
+            # print__map()
+            print("Senses after action: ", end='')
             print_senses()
+            print_Absolute_Map()
+            
         
 
     # Check if entered portal or WUMPUS
@@ -763,8 +768,9 @@ def world_reposition():
     update_current_senses()
     reposition(senses)
     update_all()
-    print__map()
+    
     print_Absolute_Map()   
+    print("Current Senses: ", end='')
     print_senses()
     first_start = 1
 
@@ -772,7 +778,7 @@ def start_wumpus():
    # Set Agent start and print initial map
     reborn()
     create_abs_map()
-    
+    print__map()
 
     # Call reposition
     world_reposition()
