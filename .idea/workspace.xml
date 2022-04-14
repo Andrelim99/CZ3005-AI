@@ -25,6 +25,7 @@
     <list default="true" id="4f2d9758-b54d-4949-939d-ad7184920ebe" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Lab1/agent.pl" beforeDir="false" afterPath="$PROJECT_DIR$/Lab1/agent.pl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Lab1/driver.py" beforeDir="false" afterPath="$PROJECT_DIR$/Lab1/driver.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
