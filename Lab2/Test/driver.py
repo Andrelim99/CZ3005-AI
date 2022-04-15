@@ -890,6 +890,7 @@ Pick an action for the agent:
         #     elif mov == 'shoot':
         #         choice = 5
 
+        # UNCOMMENT FOR MANUAL PATH PICKING
         try:
 
             print("Agent thinks it should do: ", get_move())

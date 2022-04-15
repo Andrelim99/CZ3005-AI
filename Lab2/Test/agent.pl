@@ -49,9 +49,9 @@ reborn:-
     retractall(relative_position(_, _)),
     retractall(wall(_, _)),
     retractall(numcoins(_)),
-    retractall(comfirm_not_wumpus(_, _)),
-    retractall(comfirm_not_portal(_, _)),
-
+    retractall(confirm_not_wumpus(_, _)),
+    retractall(confirm_not_portal(_, _)),
+               
     % Not to be reset in reposition-----
     assert(has_coin(false)),
     assert(numcoins(0)),
@@ -68,31 +68,30 @@ reborn:-
     
 
 reposition(L):-
-        retractall(visited(_, _)),
-        retractall(wumpus(_, _)),
-        retractall(portal(_, _)),
-        retractall(confounded(_)),
-        retractall(tingle(_, _)),
-        retractall(glitter(_, _)),
-        retractall(stench(_, _)),
-        retractall(safe(_, _)),
-        % retractall(wumpus_dead(_)),
-        % retractall(has_coin(_)),
-        % retractall(fired(_)),
-        retractall(direction(_)),
-        retractall(relative_position(_, _)),
-        retractall(wall(_, _)),
-        % retractall(numcoins(_)),
+    retractall(visited(_, _)),
+    retractall(wumpus(_, _)),
+    retractall(portal(_, _)),
+    retractall(confounded(_)),
+    retractall(tingle(_, _)),
+    retractall(glitter(_, _)),
+    retractall(stench(_, _)),
+    retractall(safe(_, _)),
+    % retractall(wumpus_dead(_)),
+    % retractall(has_coin(_)),
+    % retractall(fired(_)),
+    retractall(direction(_)),
+    retractall(relative_position(_, _)),
+    retractall(wall(_, _)),
+    % retractall(numcoins(_)),
 
-        retractall(comfirm_not_wumpus(_, _)),
-        retractall(comfirm_not_portal(_, _)),
+    retractall(confirm_not_wumpus(_, _)),
+    retractall(confirm_not_portal(_, _)),
 
-
-        assert(safe(0,0)),
-        assert(visited(0,0)),
-        assert(direction(rnorth)),
-        assert(relative_position(0, 0)),
-        percept(L).
+    assert(safe(0,0)),
+    assert(visited(0,0)),
+    assert(direction(rnorth)),
+    assert(relative_position(0, 0)),
+    percept(L).
 
 retract_portal_wumpus(X, Y) :-
     portal(X, Y), wumpus(X, Y) -> retract(portal(X, Y)), retract(wumpus(X, Y));
