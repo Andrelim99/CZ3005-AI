@@ -12,11 +12,11 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 # Map - Row by Column (7 x 6)
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
-       ['#', '', '', '', '', '#'],      #1
-       ['#', '', 'P', 'C', '', '#'],    #2
-       ['#', '', '#', 'W', 'C', '#'],    #3
+       ['#', 'P', '', '', 'W', '#'],      #1
+       ['#', '', '', 'C', '', '#'],    #2
+       ['#', '', '#', '', 'C', '#'],    #3
        ['#', '', '', '', '', '#'],      #4
-       ['#', '', 'P', '', '', '#'],     #5
+       ['#', 'P', '', '', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 
@@ -869,28 +869,28 @@ Pick an action for the agent:
 ''')
 
         # UNCOMMENT FOR AUTOMATED PATHFINDING
-        # if(len(moves) == 0):
-        #     try:
-        #         moves = get_move()
-        #         print("Next Move: ", moves)
+        if(len(moves) == 0):
+            try:
+                moves = get_move()
+                print("Next Move: ", moves)
 
-        #     except:
-        #         moves.append("No move")
-        #         print("Agent cannot make a safe move, please choose...")
-        #         choice = int(input("Choice: "))
+            except:
+                moves.append("No move")
+                print("Agent cannot make a safe move, please choose...")
+                choice = int(input("Choice: "))
 
-        # mov = moves.pop(0)
-        # if mov != 'No move':
-        #     if mov == 'moveforward':
-        #         choice = 1
-        #     elif mov == 'turnleft':
-        #         choice = 2
-        #     elif mov == 'turnright':
-        #         choice = 3
-        #     elif mov == 'pickup':
-        #         choice = 4
-        #     elif mov == 'shoot':
-        #         choice = 5
+        mov = moves.pop(0)
+        if mov != 'No move':
+            if mov == 'moveforward':
+                choice = 1
+            elif mov == 'turnleft':
+                choice = 2
+            elif mov == 'turnright':
+                choice = 3
+            elif mov == 'pickup':
+                choice = 4
+            elif mov == 'shoot':
+                choice = 5
 
         # UNCOMMENT FOR MANUAL PATH PICKING
         try:
@@ -899,7 +899,10 @@ Pick an action for the agent:
         except:
             print("Agent doesn't know what to do...")
             
-        choice = int(input("Choice: "))
+        import time
+        time.sleep(1) 
+        
+        # choice = int(input("Choice: "))
 
         
         if choice == 1:
