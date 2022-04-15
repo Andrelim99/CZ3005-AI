@@ -893,11 +893,11 @@ Pick an action for the agent:
                 choice = 5
 
         # UNCOMMENT FOR MANUAL PATH PICKING
-        try:
+        # try:
 
-            print("Agent thinks it should do: ", get_move())
-        except:
-            print("Agent doesn't know what to do...")
+        #     print("Agent thinks it should do: ", get_move())
+        # except:
+        #     print("Agent doesn't know what to do...")
             
         import time
         time.sleep(1) 
@@ -975,7 +975,7 @@ Pick an action for the agent:
         else:        
             # print__map()
             print("Has arrow: ", hasarrow())
-            print("Number of coins: ", numcoins())
+            # print("Number of coins: ", numcoins())
             print("Senses after action: ", end='')            
             print_senses()
             print_Absolute_Map()
