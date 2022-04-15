@@ -173,6 +173,7 @@ def move(A, L):
     list(prolog.query(f"move({A}, {L})"))
 
 def explore():
+    # print("MOVES: ", list(prolog.query("explore(L)")))
     return list(prolog.query("explore(L)"))
 
 def reposition(L):
@@ -715,10 +716,11 @@ def facing_wumpus():
 
 # Function to check if wumpus got killed after shooting
 def check_if_wumpus_killed():
-    global senses
+    global senses, actual_wumpus
     if facing_wumpus():
         senses[5] = 'on'
         print("Wumpus has been slain!")
+        actual_wumpus = set()
 
 # ----------------------------
 
@@ -852,7 +854,7 @@ def update_all():
 
 
 def controls():
-    global absDir, rX, rY, rDir, senses, actual_coin
+    global absDir, rX, rY, rDir, senses, actual_coin, actual_wumpus
     moves = []
     choice = 1
     while choice != 6:
@@ -930,7 +932,10 @@ Pick an action for the agent:
             print("Attempting to pick up coin...")
             move("pickup", senses)
             # create_abs_map()
-            actual_coin.remove((absY, absX))
+            try:
+                actual_coin.remove((absY, absX))
+            except:
+                pass
             update_current_senses()
                 
             
@@ -954,7 +959,7 @@ Pick an action for the agent:
 
         update_all()
         # Check if entered wumpus cell
-        if  (absY, absX) in actual_wumpus and not wumpus_dead():
+        if  (absY, absX) in actual_wumpus:
             print("Oops... Agent has been devoured! Game Over!")
             break
 
