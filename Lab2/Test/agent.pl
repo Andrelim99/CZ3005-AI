@@ -26,7 +26,9 @@ update_safe/2,
 remove_all_in_wall/2,
 confirm_not_wumpus/2,
 confirm_not_portal/2,
-explore/1.
+explore/1,
+% Updated as at 15/4/2021
+numcoins/1.
 
 
 
@@ -46,12 +48,13 @@ reborn:-
     retractall(direction(_)),
     retractall(relative_position(_, _)),
     retractall(wall(_, _)),
-
+    retractall(numcoins(_)),
     retractall(comfirm_not_wumpus(_, _)),
     retractall(comfirm_not_portal(_, _)),
 
     % Not to be reset in reposition-----
     assert(has_coin(false)),
+    assert(numcoins(0)),
     assert(fired(false)),
     assert(wumpus_dead(false)),    
     % ----------------------------------
@@ -73,9 +76,13 @@ reposition(L):-
         retractall(glitter(_, _)),
         retractall(stench(_, _)),
         retractall(safe(_, _)),
+        % retractall(wumpus_dead(_)),
+        % retractall(has_coin(_)),
+        % retractall(fired(_)),
         retractall(direction(_)),
         retractall(relative_position(_, _)),
         retractall(wall(_, _)),
+        % retractall(numcoins(_)),
 
         retractall(comfirm_not_wumpus(_, _)),
         retractall(comfirm_not_portal(_, _)),
@@ -131,7 +138,8 @@ remove_all_in_wall(X, Y) :-
 % Pick up
 pickup([_, _, _, G|_]) :-
     current(X, Y, _),
-    G == on, retract(has_coin(false)), retract(glitter(X, Y)), assert(has_coin(true)).
+    G == on, retract(glitter(X, Y)),
+    numcoins(N), NewN is N+1, retractall(numcoins(_)), assert(numcoins(NewN)).
 
 
 % Fire arrow
@@ -305,7 +313,16 @@ confounded :-
     confounded(true).
 
 
-explore(moveforward) :-
+% EXPLORE - TO DO
+% explore([Mov|Movs]) :-
+%     explore([Mov]), explore([Movs]).
+
+
+
+explore([moveforward]) :-
+    front_cell_unvisited_safe.
+
+front_cell_unvisited_safe :-
     current(X, Y, CurDir),
     (
         (CurDir == rnorth, NewX is X, NewY is Y + 1);
@@ -315,14 +332,55 @@ explore(moveforward) :-
     ),
     safe(NewX, NewY), \+visited(NewX, NewY).
 
-explore(pickup) :-
+explore([pickup]) :-
     current(X, Y, _),
     glitter(X, Y).
 
-explore(turnleft) :-
-    \+explore(moveforward), \+explore(pickup), \+explore(shoot), adjacent_safe_cell.
 
-adjacent_safe_cell :-
+explore([turnleft]) :-
+    \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), left_cell_unvisited_safe.
+
+left_cell_unvisited_safe :-
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X-1, NewY is Y);
+        (CurDir == rsouth, NewX is X+1, NewY is Y);
+        (CurDir == reast, NewX is X, NewY is Y+1);
+        (CurDir == rwest, NewX is X, NewY is Y-1)
+    ),
+    safe(NewX, NewY), \+visited(NewX, NewY).
+
+explore([turnright]) :-
+    \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]),\+explore([turnleft]), right_cell_unvisited_safe.
+
+right_cell_unvisited_safe :-
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X+1, NewY is Y);
+        (CurDir == rsouth, NewX is X-1, NewY is Y);
+        (CurDir == reast, NewX is X, NewY is Y-1);
+        (CurDir == rwest, NewX is X, NewY is Y+1)
+    ),
+    safe(NewX, NewY), \+visited(NewX, NewY).
+
+explore([turnleft, turnleft]) :-
+    \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), \+explore([turnleft]), \+explore([turnright]), behind_cell_unvisited_safe.
+
+
+behind_cell_unvisited_safe :-
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X, NewY is Y - 1);
+        (CurDir == rsouth, NewX is X, NewY is Y + 1);
+        (CurDir == reast, NewX is X-1, NewY is Y);
+        (CurDir == rwest, NewX is X+1, NewY is Y)
+    ),
+    safe(NewX, NewY), \+visited(NewX, NewY).
+
+
+
+
+adjacent_unvisited_safe_cell :-
     current(X, Y, CurDir),
     UpX is X+1, DownX is X-1, UpY is Y+1, DownY is Y-1,
     (
@@ -332,8 +390,8 @@ adjacent_safe_cell :-
         (safe(DownX, Y), \+visited(DownX, Y))
     ).
 
-explore(shoot) :-
-    \+explore(pickup), \+adjacent_safe_cell, hasarrow, 
+explore([shoot]) :-
+    \+explore([pickup]), \+adjacent_unvisited_safe_cell, hasarrow, 
     adjacent_wumpus.
 
 adjacent_wumpus :-
@@ -347,21 +405,38 @@ adjacent_wumpus :-
     wumpus(NewX, NewY).
 
 
-% BACKTRACKING... NOT NEEDED APPARENTLY?
-% explore(turnright) :-
-%     \+adjacent_safe_cell, \+explore(moveforward), \+explore(shoot).
+% BACKTRACKING... UNFINISHED
+% explore([turnleft, turnleft, moveforward]) :-
+%     \+adjacent_unvisited_safe_cell.
 
-% explore(moveforward) :-
-%     \+adjacent_safe_cell,
-%     current(X, Y, CurDir),
-%     (
-%         (CurDir == rnorth, NewX is X, NewY is Y + 1);
-%         (CurDir == rsouth, NewX is X, NewY is Y - 1);
-%         (CurDir == reast, NewX is X+1, NewY is Y);
-%         (CurDir == rwest, NewX is X-1, NewY is Y)
-%     ),
-%     safe(NewX, NewY).
+explore([turnleft]) :-
+    \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]).
+
+explore([moveforward]) :-
+    \+adjacent_unvisited_safe_cell, safe_unvisited_cell, front_cell_safe_visited.
+
+front_cell_safe_visited :-
+    current(X, Y, CurDir),
+    (
+        (CurDir == rnorth, NewX is X, NewY is Y + 1);
+        (CurDir == rsouth, NewX is X, NewY is Y - 1);
+        (CurDir == reast, NewX is X+1, NewY is Y);
+        (CurDir == rwest, NewX is X-1, NewY is Y)
+    ),
+    visited(NewX, NewY).    
+
+
+% explore(turnright) :-
+%     \+adjacent_unvisited_safe_cell, \+explore([pickup]), \+explore([moveforward]), \+explore([shoot]), safe_unvisited_cell.
+
+safe_unvisited_cell :-
+    safe(X, Y), \+visited(X, Y).
+
+
     
+
+% Pathfinding
+
 
 
 % explore(L) :-
