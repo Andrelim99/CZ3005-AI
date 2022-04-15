@@ -869,37 +869,37 @@ Pick an action for the agent:
 ''')
 
         # UNCOMMENT FOR AUTOMATED PATHFINDING
-        # if(len(moves) == 0):
-        #     try:
-        #         moves = get_move()
-        #         print("Next Move: ", moves)
+        if(len(moves) == 0):
+            try:
+                moves = get_move()
+                print("Next Move: ", moves)
 
-        #     except:
-        #         moves.append("No move")
-        #         print("Agent cannot make a safe move, please choose...")
-        #         choice = int(input("Choice: "))
+            except:
+                moves.append("No move")
+                print("Agent cannot make a safe move, please choose...")
+                choice = int(input("Choice: "))
 
-        # mov = moves.pop(0)
-        # if mov != 'No move':
-        #     if mov == 'moveforward':
-        #         choice = 1
-        #     elif mov == 'turnleft':
-        #         choice = 2
-        #     elif mov == 'turnright':
-        #         choice = 3
-        #     elif mov == 'pickup':
-        #         choice = 4
-        #     elif mov == 'shoot':
-        #         choice = 5
+        mov = moves.pop(0)
+        if mov != 'No move':
+            if mov == 'moveforward':
+                choice = 1
+            elif mov == 'turnleft':
+                choice = 2
+            elif mov == 'turnright':
+                choice = 3
+            elif mov == 'pickup':
+                choice = 4
+            elif mov == 'shoot':
+                choice = 5
 
         # UNCOMMENT FOR MANUAL PATH PICKING
-        try:
+        # try:
 
-            print("Agent thinks it should do: ", get_move())
-        except:
-            print("Agent doesn't know what to do...")
+        #     print("Agent thinks it should do: ", get_move())
+        # except:
+        #     print("Agent doesn't know what to do...")
             
-        choice = int(input("Choice: "))
+        # choice = int(input("Choice: "))
 
         
         if choice == 1:
@@ -972,7 +972,7 @@ Pick an action for the agent:
         else:        
             # print__map()
             print("Has arrow: ", hasarrow())
-            print("Number of coins: ", numcoins())
+            # print("Number of coins: ", numcoins())
             print("Senses after action: ", end='')            
             print_senses()
             print_Absolute_Map()
