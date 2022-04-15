@@ -865,6 +865,8 @@ Pick an action for the agent:
 4) Pick Up Coin
 5) Shoot
 ''')
+
+        # UNCOMMENT FOR AUTOMATED PATHFINDING
         # if(len(moves) == 0):
         #     try:
         #         moves = get_move()
@@ -889,9 +891,11 @@ Pick an action for the agent:
         #         choice = 5
 
         try:
-            print(get_move())
+
+            print("Agent thinks it should do: ", get_move())
         except:
-            pass
+            print("Agent doesn't know what to do...")
+            
         choice = int(input("Choice: "))
 
         
