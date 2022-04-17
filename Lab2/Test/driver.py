@@ -282,8 +282,8 @@ def spawn_spots():
 # Spawn - Currently has a default spawn location
 def random_spawn():
     global spawnX, spawnY, absX, absY
-    # (spawnY, spawnX) = random.choice(spawn_spots())
-    spawnY, spawnX = 4, 1
+    (spawnY, spawnX) = random.choice(spawn_spots())
+    # spawnY, spawnX = 4, 1
     absY, absX = spawnY, spawnX
     
 # random Direction
@@ -733,7 +733,7 @@ def check_if_wumpus_killed():
 def get_move():
     c = explore()
     print(c)
-    print("GOALS: ", list(prolog.query("goal(G)")))
+    # print("GOALS: ", list(prolog.query("goal(G)")))
  
     return c[0]['L']
 
