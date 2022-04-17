@@ -173,7 +173,7 @@ def move(A, L):
     list(prolog.query(f"move({A}, {L})"))
 
 def explore():
-    # print("MOVES: ", list(prolog.query("explore(L)")))
+    print("MOVES: ", list(prolog.query("explore(L)")))
     return list(prolog.query("explore(L)"))
 
 def reposition(L):
@@ -277,7 +277,7 @@ def spawn_spots():
 def random_spawn():
     global spawnX, spawnY, absX, absY
     # (spawnY, spawnX) = random.choice(spawn_spots())
-    spawnY, spawnX = 2, 3
+    spawnY, spawnX = 4, 1
     absY, absX = spawnY, spawnX
     
 # random Direction
@@ -905,7 +905,7 @@ Pick an action for the agent:
 
             choice = int(input("Choice: "))    
         
-        time.sleep(1) 
+        # time.sleep(1) 
         
         
 

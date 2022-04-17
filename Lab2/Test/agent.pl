@@ -319,7 +319,7 @@ confounded :-
 
 
 explore([moveforward]) :-
-    front_cell_unvisited_safe.
+    front_cell_unvisited_safe, \+explore([pickup]).
 
 front_cell_unvisited_safe :-
     current(X, Y, CurDir),
@@ -415,7 +415,7 @@ explore([turnright]) :-
     \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]).
 
 explore([moveforward]) :-
-    \+adjacent_unvisited_safe_cell, safe_unvisited_cell, front_cell_safe_visited.
+    \+explore([pickup]), \+adjacent_unvisited_safe_cell, safe_unvisited_cell, front_cell_safe_visited.
 
 front_cell_safe_visited :-
     current(X, Y, CurDir),
@@ -439,17 +439,27 @@ safe_unvisited_cell :-
 
 % Pathfinding
 
-explore([Sol]) :-
-    solve([])
+no_other_move :-
+    \+explore([moveforward]), \+explore([turnleft]), \+explore([turnright]), 
+    \+explore([shoot]), \+explore([pickup]), \+explore([turnleft, turnleft]).
+
+
+explore(Sol) :-
+    no_other_move, current(X, Y, _), solve([X, Y], Sol).
+
+
+solve( Node, Solution)  :-
+  depthfirst( [], Node, Solution).
 
 
 
-% explore(L) :-
-%     current(X, Y, Dir), CurX = X, CurY = Y,
-%     (
-%            ( glitter(CurX, CurY) -> L = pickup([X, Y, Dir, G|_]) ), %I'm not sure how to let L be the pickup action
-%            ( tingle(CurX, CurY)-> L = ), %if tingle is sensed at adj cells, move back?
-%            ( stench(CurX, CurY) -> L = ),
-%            ( (tingle(CurX, CurY), stench(CurX, CurY)) -> L =),
-%            ( safe(CurX, CurY) )
-%     ).
+depthfirst( Path, Node, [Node | Path] )  :-
+   goal( Node).
+
+depthfirst( Path, Node, Sol)  :-
+  visited( Node, Node1),
+  \+ member( Node1, Path),                % Prevent a cycle
+  depthfirst( [Node | Path], Node1, Sol).
+
+
+goal([0, 0]).
