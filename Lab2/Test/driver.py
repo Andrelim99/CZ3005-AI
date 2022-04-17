@@ -866,6 +866,7 @@ Pick an action for the agent:
 3) Turn Right
 4) Pick Up Coin
 5) Shoot
+6) Let the agent explore!
 ''')
 
         # UNCOMMENT FOR AUTOMATED PATHFINDING
