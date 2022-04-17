@@ -457,7 +457,7 @@ depthfirst( Path, Actions, Node, Actions, [Node | Path] )  :-
 depthfirst( Path, Actions, Node, ActionSol, Sol)  :-
   adjacent_visited_cell( Node, Node1),
   \+ member( Node1, Path),                % Prevent a cycle
-  get_action(Node, Node1, Actions, Out),
+  get_action(Node, Node1, Actions, Out, Path),
   depthfirst( [Node | Path], Out, Node1, ActionSol, Sol).
 
 adjacent_visited_cell([X, Y], [A, B]) :-
@@ -472,39 +472,57 @@ adjacent_visited_cell([X, Y], [A, B]) :-
 
 
 
-get_action([X1, Y1], [X2, Y2], In, Out) :-   
-    direction(Dir),
-        (Dir == rnorth,
-            (
-                X1 < X2, append(In, [rnorth, turnright, moveforward], Out);%, simulate_turnright;
-                X1 > X2, append(In, [rnorth, turnleft, moveforward], Out);%,  simulate_turnleft;
-                Y1 < Y2, append(In, [rnorth, moveforward], Out);
-                Y1 < Y2, append(In, [rnorth, turnright, turnright, moveforward], Out)%,  simulate_turnright, simulate_turnright
-            )
-        );
-        (Dir == rwest,
-            (
-                X1 < X2, append(In, [rwest, turnright, turnright, moveforward], Out);%,  simulate_turnright, simulate_turnright;
-                X1 > X2, append(In, [rwest, moveforward], Out);
-                Y1 < Y2, append(In, [rwest, turnright, moveforward], Out);%,  simulate_turnright;
-                Y1 < Y2, append(In, [rwest, turnleft, moveforward], Out)%,  simulate_turnleft
-            )
-        );
-        (Dir == reast,
-            (
-                X1 < X2, append(In, [reast, moveforward], Out);
-                X1 > X2, append(In, [reast, turnright, turnright, moveforward], Out);%,  simulate_turnright, simulate_turnright;
-                Y1 < Y2, append(In, [reast, turnleft, moveforward], Out);%,  simulate_turnleft;
-                Y1 < Y2, append(In, [reast, turnright, moveforward], Out)%,  simulate_turnright
-            )
-        );
-        (Dir == rsouth,
-            (
-                X1 < X2, append(In, [rsouth, moveforward], Out);%,  simulate_turnleft;
-                X1 > X2, append(In, [rsouth, moveforward], Out);%, simulate_turnright;
-                Y1 < Y2, append(In, [rsouth, turnright, moveforward], Out);%,  simulate_turnright, simulate_turnright;
-                Y1 < Y2, append(In, [rsouth], Out) 
-            )
-        ).
+get_action([X1, Y1], [X2, Y2], In, Out, Path) :-   
+    get_simulated_dir(Dir, [X1, Y1], Path),
+    (
+        (Dir == rnorth, X1 < X2) -> append(In, [turnright, moveforward], Out);
+        (Dir == rnorth, X2 < X1) -> append(In, [turnleft, moveforward], Out);
+        (Dir == rnorth, Y1 < Y2) -> append(In, [moveforward], Out);
+        (Dir == rnorth, Y2 < Y1) -> append(In, [turnright, turnright, moveforward], Out);
+
+        (Dir == reast, X1 < X2) -> append(In, [moveforward], Out);
+        (Dir == reast, X2 < X1) -> append(In, [turnright, turnright, moveforward], Out);
+        (Dir == reast, Y1 < Y2) -> append(In, [turnleft, moveforward], Out);
+        (Dir == reast, Y2 < Y1) -> append(In, [turnright, moveforward], Out);
+
+        (Dir == rwest, X1 < X2) -> append(In, [turnright, turnright, moveforward], Out);
+        (Dir == rwest, X2 < X1) -> append(In, [moveforward], Out);
+        (Dir == rwest, Y1 < Y2) -> append(In, [turnright, moveforward], Out);
+        (Dir == rwest, Y2 < Y1) -> append(In, [turnleft, moveforward], Out);
+
+        (Dir == rsouth, X1 < X2) -> append(In, [turnleft, moveforward], Out);
+        (Dir == rsouth, X2 < X1) -> append(In, [turnright, moveforward], Out);
+        (Dir == rsouth, Y1 < Y2) -> append(In, [turnright, turnright, moveforward], Out);
+        (Dir == rsouth, Y2 < Y1) -> append(In, [moveforward], Out)
+    ).
+
+
+get_simulated_dir(Dir, Cur, Path) :-
+    \+member(_, Path) -> direction(Dir);
+    get_dir(Dir, Cur, Path).
+
+
+get_dir(Dir, Cur, [Pre|_]) :-
+    simulated_north(Dir, Cur, Pre);
+    simulated_south(Dir, Cur, Pre);
+    simulated_west(Dir, Cur, Pre);
+    simulated_east(Dir, Cur, Pre).
+
+simulated_north(rnorth, [X1, Y1], [X0, Y0]) :-
+    Y1 > Y0.
+
+simulated_south(rsouth, [X1, Y1], [X0, Y0]) :-
+    Y1 < Y0.
+
+simulated_west(rwest, [X1, Y1], [X0, Y0]) :-
+    X1 < X0.
+
+simulated_east(reast, [X1, Y1], [X0, Y0]) :-
+    X1 > X0.
+
+
+
+    
+    
 
 goal([0, 0]).

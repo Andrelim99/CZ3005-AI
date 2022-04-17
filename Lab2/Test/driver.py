@@ -13,10 +13,10 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
        ['#', 'P', '', '', '', '#'],      #1
-       ['#', '#', 'W', 'C', '', '#'],    #2
-       ['#', '', '#', '', 'C', '#'],    #3
+       ['#', '', 'W', 'C', '', '#'],    #2
+       ['#', '', '', '', 'C', '#'],    #3
        ['#', '', '', '#', '', '#'],      #4
-       ['#', 'P', '#', '', 'P', '#'],     #5
+       ['#', 'P', '', '', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 
@@ -173,7 +173,7 @@ def move(A, L):
     list(prolog.query(f"move({A}, {L})"))
 
 def explore():
-    print("MOVES: ", list(prolog.query("explore(L)")))
+    # print("MOVES: ", list(prolog.query("explore(L)")))
     return list(prolog.query("explore(L)"))
 
 def reposition(L):
@@ -732,7 +732,10 @@ def check_if_wumpus_killed():
 
 def get_move():
     c = explore()
+    # print(c)
+ 
     return c[0]['L']
+
 
 # Update driver's knowledge of Agent's knowledge.. lmao
 def query_agent():
@@ -875,22 +878,14 @@ Pick an action for the agent:
 5) Shoot
 6) Let the agent explore!
 ''')
-        solve()
-        # UNCOMMENT FOR AUTOMATED PATHFINDING
         if(explore_flag):
             if len(moves) == 0:
-                try:
-                    moves = get_move()
-                    print("Next Move: ", moves)
+                moves = get_move()
+                print("Next Move: ", moves)
 
-                except:
-                    explore_flag = False
-                    moves.append("No move")
-                    print("Agent cannot make a safe move, please choose...")
-                    choice = int(input("Choice: "))
-
-            mov = moves.pop(0)
-            if mov != 'No move':
+                    
+            try:
+                mov = moves.pop(0)
                 if mov == 'moveforward':
                     choice = 1
                 elif mov == 'turnleft':
@@ -901,8 +896,14 @@ Pick an action for the agent:
                     choice = 4
                 elif mov == 'shoot':
                     choice = 5
+                
+            except:
+                explore_flag = False                    
+                print("Agent cannot make a safe move, please choose...")
+                choice = int(input("Choice: "))
+                
+            
         else:
-        # UNCOMMENT FOR MANUAL PATH PICKING
             try:
 
                 print("Agent thinks it should do: ", get_move())
@@ -913,7 +914,7 @@ Pick an action for the agent:
         
         # time.sleep(1) 
         
-        print("Agent thinks it should do: ", get_move())
+        # print("Agent thinks it should do: ", get_move())
        
         
         if choice == 1:
