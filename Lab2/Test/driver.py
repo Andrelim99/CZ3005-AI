@@ -12,11 +12,11 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 # Map - Row by Column (7 x 6)
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
-       ['#', 'P', '', '', '', '#'],      #1
-       ['#', '', 'W', 'C', '', '#'],    #2
-       ['#', '', '', '', 'C', '#'],    #3
+       ['#', '', '', '', 'P', '#'],      #1
+       ['#', 'C', 'W', 'C', '', '#'],    #2
+       ['#', '', '', '', 'P', '#'],    #3
        ['#', '', '', '#', '', '#'],      #4
-       ['#', 'P', '', '', 'P', '#'],     #5
+       ['#', '', '', 'C', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 
@@ -732,7 +732,8 @@ def check_if_wumpus_killed():
 
 def get_move():
     c = explore()
-    # print(c)
+    print(c)
+    print("GOALS: ", list(prolog.query("goal(G)")))
  
     return c[0]['L']
 
@@ -776,7 +777,7 @@ def query_agent():
     for sol in wall_at():
         r_wall_pos.add((sol['Y'], sol['X']))
         wall_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    # print("WALLS POS: ", wall_pos)
+    print("WALLS POS: ", wall_pos)
 
     # print("Wumpus: ", wumpus_at())
     for sol in wumpus_at():
@@ -800,7 +801,7 @@ def query_agent():
     for sol in safe_at():
         r_safe_pos.add((sol['Y'], sol['X']))
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    # print("SAFE POS: ", safe_pos)
+    print("SAFE POS: ", safe_pos)
 
     # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
     # tmp = set()
@@ -899,16 +900,15 @@ Pick an action for the agent:
                 
             except:
                 explore_flag = False                    
-                print("Agent cannot make a safe move, please choose...")
+                print("Agent has returned to origin, all safe cells explored!")
                 choice = int(input("Choice: "))
                 
             
         else:
             try:
-
                 print("Agent thinks it should do: ", get_move())
             except:
-                print("Agent doesn't know what to do...")
+                print("Agent doesn't know what to do or has returned to origin...")
             
             choice = int(input("Choice: "))    
         
@@ -992,7 +992,7 @@ Pick an action for the agent:
         else:        
             # print__map()
             print("Has arrow: ", hasarrow())
-            # print("Number of coins: ", numcoins())
+            print("Number of coins: ", numcoins())
             print("Senses after action: ", end='')            
             print_senses()
             print_Absolute_Map()

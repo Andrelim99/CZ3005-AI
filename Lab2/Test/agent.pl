@@ -202,8 +202,6 @@ percept([_, S, T, G, _, Sc]) :-
     (T == on, (\+tingle(X, Y),assert(tingle(X, Y))));
     % Glitter?
     (G == on, (\+glitter(X, Y),assert(glitter(X, Y))));
-    % Bump? - Handled in moveforward
-    % (B == on, (\+wall(X, Y), assert(wall(X, Y)))));
     % Scream?
     (Sc == on, assert(wumpus_dead(true)), retract(wumpus_dead(false)))
     ).
@@ -252,7 +250,7 @@ percept([_, S|_]) :-
                 (\+confirm_not_wumpus(X, DownY), assert(confirm_not_wumpus(X, DownY)), retract(wumpus(X, DownY)));
                 (\+confirm_not_wumpus(UpX, Y), assert(confirm_not_wumpus(UpX, Y)), retract(wumpus(UpX, Y)));
                 (\+confirm_not_wumpus(DownX, Y), assert(confirm_not_wumpus(DownX, Y)), retract(wumpus(DownX, Y)))
-            )
+            ), add_new_safe
         ).
 
 
@@ -280,7 +278,7 @@ percept([_, _, T|_]) :-
                 (\+confirm_not_portal(X, DownY), assert(confirm_not_portal(X, DownY)), retract(portal(X, DownY)));
                 (\+confirm_not_portal(UpX, Y), assert(confirm_not_portal(UpX, Y)), retract(portal(UpX, Y)));
                 (\+confirm_not_portal(DownX, Y), assert(confirm_not_portal(DownX, Y)), retract(portal(DownX, Y)))
-            )
+            ), add_new_safe
         ).
 
 percept([_, _, T|_]) :-
@@ -296,6 +294,9 @@ percept([_, _, T|_]) :-
         )
 
     ).
+add_new_safe :-
+    confirm_not_portal(X, Y), confirm_not_wumpus(X, Y), \+safe(X, Y), assert(safe(X, Y)).
+
 
 % has arrow
 hasarrow :-
@@ -318,8 +319,8 @@ confounded :-
 
 
 
-explore([moveforward]) :-
-    front_cell_unvisited_safe, \+explore([pickup]).
+% explore([moveforward]) :-
+%     front_cell_unvisited_safe, \+explore([pickup]).
 
 front_cell_unvisited_safe :-
     current(X, Y, CurDir),
@@ -336,8 +337,8 @@ explore([pickup]) :-
     glitter(X, Y).
 
 
-explore([turnleft]) :-
-    \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), left_cell_unvisited_safe.
+% explore([turnleft]) :-
+%     \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), left_cell_unvisited_safe.
 
 left_cell_unvisited_safe :-
     current(X, Y, CurDir),
@@ -349,8 +350,8 @@ left_cell_unvisited_safe :-
     ),
     safe(NewX, NewY), \+visited(NewX, NewY).
 
-explore([turnright]) :-
-    \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]),\+explore([turnleft]), right_cell_unvisited_safe.
+% explore([turnright]) :-
+%     \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]),\+explore([turnleft]), right_cell_unvisited_safe.
 
 right_cell_unvisited_safe :-
     current(X, Y, CurDir),
@@ -362,8 +363,8 @@ right_cell_unvisited_safe :-
     ),
     safe(NewX, NewY), \+visited(NewX, NewY).
 
-explore([turnleft, turnleft]) :-
-    \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), \+explore([turnleft]), \+explore([turnright]), behind_cell_unvisited_safe.
+% explore([turnleft, turnleft]) :-
+%     \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), \+explore([turnleft]), \+explore([turnright]), behind_cell_unvisited_safe.
 
 
 behind_cell_unvisited_safe :-
@@ -408,14 +409,14 @@ adjacent_wumpus :-
 % explore([turnleft, turnleft, moveforward]) :-
 %     \+adjacent_unvisited_safe_cell.
 
-explore([turnleft]) :-
-    \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), random(1, 11, V), V > 3.
+% explore([turnleft]) :-
+%     \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), random(1, 11, V), V > 3.
 
-explore([turnright]) :-
-    \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]).
+% explore([turnright]) :-
+%     \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]).
 
-explore([moveforward]) :-
-    \+explore([pickup]), \+adjacent_unvisited_safe_cell, safe_unvisited_cell, front_cell_safe_visited.
+% explore([moveforward]) :-
+%     \+explore([pickup]), \+adjacent_unvisited_safe_cell, safe_unvisited_cell, front_cell_safe_visited.
 
 front_cell_safe_visited :-
     current(X, Y, CurDir),
@@ -432,7 +433,7 @@ front_cell_safe_visited :-
 %     \+adjacent_unvisited_safe_cell, \+explore([pickup]), \+explore([moveforward]), \+explore([shoot]), safe_unvisited_cell.
 
 safe_unvisited_cell :-
-    safe(X, Y), \+visited(X, Y).
+    safe(X, Y),\+wall(X,Y), \+visited(X, Y).
 
 
     
@@ -443,7 +444,7 @@ no_safe_unvisited_spots :-
     \+safe_unvisited_cell.
 
 explore(Actions) :-
-    no_safe_unvisited_spots, current(X, Y, _), solve([X, Y], Actions, Sol).
+    current(X, Y, _), solve([X, Y], Actions, Sol).
 
 
 solve(Node, Actions, Solution)  :-
@@ -455,7 +456,10 @@ depthfirst( Path, Actions, Node, Actions, [Node | Path] )  :-
    goal( Node).
 
 depthfirst( Path, Actions, Node, ActionSol, Sol)  :-
-  adjacent_visited_cell( Node, Node1),
+  (
+    adjacent_goal(Node, Node1);
+    adjacent_visited_cell( Node, Node1)
+  ),
   \+ member( Node1, Path),                % Prevent a cycle
   get_action(Node, Node1, Actions, Out, Path),
   depthfirst( [Node | Path], Out, Node1, ActionSol, Sol).
@@ -522,7 +526,23 @@ simulated_east(reast, [X1, Y1], [X0, Y0]) :-
 
 
 
-    
+adjacent_goal([X, Y], [A, B]) :-
+    UpX is X+1, DownX is X-1, UpY is Y+1, DownY is Y-1,
+    goal([A, B]),
+    (
+        (A == UpX, B == Y);
+        (A == DownX, B == Y);
+        (A == X, B == UpY);
+        (A == X, B == DownY)        
+    ).
+
     
 
-goal([0, 0]).
+goal([0, 0]) :-
+    no_safe_unvisited_spots.
+
+goal([X, Y]) :-
+    safe_unvisited_cell(X, Y).
+
+safe_unvisited_cell(X, Y) :-
+    safe(X, Y), \+visited(X, Y), \+wall(X, Y).
