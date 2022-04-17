@@ -12,8 +12,8 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 # Map - Row by Column (7 x 6)
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
-       ['#', 'P', '', '', 'W', '#'],      #1
-       ['#', '', '', 'C', '', '#'],    #2
+       ['#', 'P', '', '', '', '#'],      #1
+       ['#', '', 'W', 'C', '', '#'],    #2
        ['#', '', '#', '', 'C', '#'],    #3
        ['#', '', '', '', '', '#'],      #4
        ['#', 'P', '', '', 'P', '#'],     #5
@@ -276,8 +276,8 @@ def spawn_spots():
 # Spawn - Currently has a default spawn location
 def random_spawn():
     global spawnX, spawnY, absX, absY
-    (spawnY, spawnX) = random.choice(spawn_spots())
-    # spawnY, spawnX = 1, 4
+    # (spawnY, spawnX) = random.choice(spawn_spots())
+    spawnY, spawnX = 2, 3
     absY, absX = spawnY, spawnX
     
 # random Direction
@@ -905,7 +905,7 @@ Pick an action for the agent:
 
             choice = int(input("Choice: "))    
         
-        time.sleep(1) 
+        # time.sleep(1) 
         
         
 
