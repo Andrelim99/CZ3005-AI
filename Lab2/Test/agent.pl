@@ -409,6 +409,9 @@ adjacent_wumpus :-
 %     \+adjacent_unvisited_safe_cell.
 
 explore([turnleft]) :-
+    \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]), random(1, 11, V), V > 3.
+
+explore([turnright]) :-
     \+adjacent_unvisited_safe_cell, safe_unvisited_cell, \+explore([moveforward]), \+explore([pickup]), \+explore([shoot]).
 
 explore([moveforward]) :-
@@ -435,6 +438,9 @@ safe_unvisited_cell :-
     
 
 % Pathfinding
+
+explore([Sol]) :-
+    solve([])
 
 
 

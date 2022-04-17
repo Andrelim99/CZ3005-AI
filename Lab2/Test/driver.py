@@ -905,7 +905,7 @@ Pick an action for the agent:
 
             choice = int(input("Choice: "))    
         
-        # time.sleep(1) 
+        time.sleep(1) 
         
         
 
