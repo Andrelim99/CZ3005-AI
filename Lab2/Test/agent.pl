@@ -442,22 +442,23 @@ safe_unvisited_cell :-
 no_safe_unvisited_spots :-
     \+safe_unvisited_cell.
 
-explore(Sol) :-
-    no_safe_unvisited_spots, current(X, Y, _), solve([X, Y], Sol).
+explore(Actions) :-
+    no_safe_unvisited_spots, current(X, Y, _), solve([X, Y], Actions, Sol).
 
 
-solve(Node, Solution)  :-
-  depthfirst( [], Node, Solution).
+solve(Node, Actions, Solution)  :-
+  depthfirst( [], [], Node, Actions, Solution).
 
 
 
-depthfirst( Path, Node, [Node | Path] )  :-
+depthfirst( Path, Actions, Node, Actions, [Node | Path] )  :-
    goal( Node).
 
-depthfirst( Path, Node, Sol)  :-
+depthfirst( Path, Actions, Node, ActionSol, Sol)  :-
   adjacent_visited_cell( Node, Node1),
   \+ member( Node1, Path),                % Prevent a cycle
-  depthfirst( [Node | Path], Node1, Sol).
+  get_action(Node, Node1, Actions, Out),
+  depthfirst( [Node | Path], Out, Node1, ActionSol, Sol).
 
 adjacent_visited_cell([X, Y], [A, B]) :-
     UpX is X+1, DownX is X-1, UpY is Y+1, DownY is Y-1,
@@ -469,5 +470,41 @@ adjacent_visited_cell([X, Y], [A, B]) :-
         (A == X, B == DownY)        
     ).
 
+
+
+get_action([X1, Y1], [X2, Y2], In, Out) :-   
+    direction(Dir),
+        (Dir == rnorth,
+            (
+                X1 < X2, append(In, [rnorth, turnright, moveforward], Out);%, simulate_turnright;
+                X1 > X2, append(In, [rnorth, turnleft, moveforward], Out);%,  simulate_turnleft;
+                Y1 < Y2, append(In, [rnorth, moveforward], Out);
+                Y1 < Y2, append(In, [rnorth, turnright, turnright, moveforward], Out)%,  simulate_turnright, simulate_turnright
+            )
+        );
+        (Dir == rwest,
+            (
+                X1 < X2, append(In, [rwest, turnright, turnright, moveforward], Out);%,  simulate_turnright, simulate_turnright;
+                X1 > X2, append(In, [rwest, moveforward], Out);
+                Y1 < Y2, append(In, [rwest, turnright, moveforward], Out);%,  simulate_turnright;
+                Y1 < Y2, append(In, [rwest, turnleft, moveforward], Out)%,  simulate_turnleft
+            )
+        );
+        (Dir == reast,
+            (
+                X1 < X2, append(In, [reast, moveforward], Out);
+                X1 > X2, append(In, [reast, turnright, turnright, moveforward], Out);%,  simulate_turnright, simulate_turnright;
+                Y1 < Y2, append(In, [reast, turnleft, moveforward], Out);%,  simulate_turnleft;
+                Y1 < Y2, append(In, [reast, turnright, moveforward], Out)%,  simulate_turnright
+            )
+        );
+        (Dir == rsouth,
+            (
+                X1 < X2, append(In, [rsouth, moveforward], Out);%,  simulate_turnleft;
+                X1 > X2, append(In, [rsouth, moveforward], Out);%, simulate_turnright;
+                Y1 < Y2, append(In, [rsouth, turnright, moveforward], Out);%,  simulate_turnright, simulate_turnright;
+                Y1 < Y2, append(In, [rsouth], Out) 
+            )
+        ).
 
 goal([0, 0]).

@@ -263,7 +263,7 @@ def safe():
 
 def solve():
     global rX, rY
-    c = list(prolog.query(f"solve([{rX}, {rY}], Sol)"))
+    c = list(prolog.query(f"solve([{rX}, {rY}], Action, Sol)"))
     print("\nPath: ", c)
 # -----------------------------------------------
 
