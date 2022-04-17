@@ -732,7 +732,7 @@ def check_if_wumpus_killed():
 
 def get_move():
     c = explore()
-    print(c)
+    # print(c)
     # print("GOALS: ", list(prolog.query("goal(G)")))
  
     return c[0]['L']
@@ -777,7 +777,7 @@ def query_agent():
     for sol in wall_at():
         r_wall_pos.add((sol['Y'], sol['X']))
         wall_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("WALLS POS: ", wall_pos)
+    # print("WALLS POS: ", wall_pos)
 
     # print("Wumpus: ", wumpus_at())
     for sol in wumpus_at():
@@ -801,7 +801,7 @@ def query_agent():
     for sol in safe_at():
         r_safe_pos.add((sol['Y'], sol['X']))
         safe_pos.add((get_abs_coord((sol['Y'], sol['X']))))
-    print("SAFE POS: ", safe_pos)
+    # print("SAFE POS: ", safe_pos)
 
     # print("Not Wumpus at: ", list(prolog.query("confirm_not_wumpus(X, Y)")))
     # tmp = set()
@@ -992,7 +992,7 @@ Pick an action for the agent:
         else:        
             # print__map()
             print("Has arrow: ", hasarrow())
-            print("Number of coins: ", numcoins())
+            # print("Number of coins: ", numcoins())
             print("Senses after action: ", end='')            
             print_senses()
             print_Absolute_Map()
