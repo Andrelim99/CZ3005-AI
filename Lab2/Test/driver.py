@@ -1,4 +1,4 @@
-
+import time
 import random
 from pyswip import Prolog
 
@@ -857,7 +857,8 @@ def controls():
     global absDir, rX, rY, rDir, senses, actual_coin, actual_wumpus
     moves = []
     choice = 1
-    while choice != 6:
+    explore_flag = False
+    while choice != -1:
         # print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
 Pick an action for the agent:
@@ -870,40 +871,43 @@ Pick an action for the agent:
 ''')
 
         # UNCOMMENT FOR AUTOMATED PATHFINDING
-        if(len(moves) == 0):
-            try:
-                moves = get_move()
-                print("Next Move: ", moves)
+        if(explore_flag):
+            if len(moves) == 0:
+                try:
+                    moves = get_move()
+                    print("Next Move: ", moves)
 
-            except:
-                moves.append("No move")
-                print("Agent cannot make a safe move, please choose...")
-                choice = int(input("Choice: "))
+                except:
+                    explore_flag = False
+                    moves.append("No move")
+                    print("Agent cannot make a safe move, please choose...")
+                    choice = int(input("Choice: "))
 
-        mov = moves.pop(0)
-        if mov != 'No move':
-            if mov == 'moveforward':
-                choice = 1
-            elif mov == 'turnleft':
-                choice = 2
-            elif mov == 'turnright':
-                choice = 3
-            elif mov == 'pickup':
-                choice = 4
-            elif mov == 'shoot':
-                choice = 5
-
+            mov = moves.pop(0)
+            if mov != 'No move':
+                if mov == 'moveforward':
+                    choice = 1
+                elif mov == 'turnleft':
+                    choice = 2
+                elif mov == 'turnright':
+                    choice = 3
+                elif mov == 'pickup':
+                    choice = 4
+                elif mov == 'shoot':
+                    choice = 5
+        else:
         # UNCOMMENT FOR MANUAL PATH PICKING
-        # try:
+            try:
 
-        #     print("Agent thinks it should do: ", get_move())
-        # except:
-        #     print("Agent doesn't know what to do...")
-            
-        import time
+                print("Agent thinks it should do: ", get_move())
+            except:
+                print("Agent doesn't know what to do...")
+
+            choice = int(input("Choice: "))    
+        
         time.sleep(1) 
         
-        # choice = int(input("Choice: "))
+        
 
         
         if choice == 1:
@@ -957,6 +961,11 @@ Pick an action for the agent:
                 # print("WUMPUS DEAD: ", wumpus_dead())
             else:
                 print("No arrows to shoot")
+
+        elif choice == 6:
+            explore_flag = True
+            print("Agent shall begin Exploring...")
+
         else:
             "Invalid Option!"
             continue
