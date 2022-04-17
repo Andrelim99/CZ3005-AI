@@ -439,16 +439,14 @@ safe_unvisited_cell :-
 
 % Pathfinding
 
-no_other_move :-
-    \+explore([moveforward]), \+explore([turnleft]), \+explore([turnright]), 
-    \+explore([shoot]), \+explore([pickup]), \+explore([turnleft, turnleft]).
-
+no_safe_unvisited_spots :-
+    \+safe_unvisited_cell.
 
 explore(Sol) :-
-    no_other_move, current(X, Y, _), solve([X, Y], Sol).
+    no_safe_unvisited_spots, current(X, Y, _), solve([X, Y], Sol).
 
 
-solve( Node, Solution)  :-
+solve(Node, Solution)  :-
   depthfirst( [], Node, Solution).
 
 
@@ -457,9 +455,19 @@ depthfirst( Path, Node, [Node | Path] )  :-
    goal( Node).
 
 depthfirst( Path, Node, Sol)  :-
-  visited( Node, Node1),
+  adjacent_visited_cell( Node, Node1),
   \+ member( Node1, Path),                % Prevent a cycle
   depthfirst( [Node | Path], Node1, Sol).
+
+adjacent_visited_cell([X, Y], [A, B]) :-
+    UpX is X+1, DownX is X-1, UpY is Y+1, DownY is Y-1,
+    visited(A, B),
+    (
+        (A == UpX, B == Y);
+        (A == DownX, B == Y);
+        (A == X, B == UpY);
+        (A == X, B == DownY)        
+    ).
 
 
 goal([0, 0]).

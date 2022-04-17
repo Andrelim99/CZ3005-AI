@@ -13,10 +13,10 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
        ['#', 'P', '', '', '', '#'],      #1
-       ['#', '', 'W', 'C', '', '#'],    #2
+       ['#', '#', 'W', 'C', '', '#'],    #2
        ['#', '', '#', '', 'C', '#'],    #3
-       ['#', '', '', '', '', '#'],      #4
-       ['#', 'P', '', '', 'P', '#'],     #5
+       ['#', '', '', '#', '', '#'],      #4
+       ['#', 'P', '#', '', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 
@@ -259,6 +259,12 @@ def visited():
 def safe():
     c = list(prolog.query("safe(X, Y)"))
     print("\nSafe Cells: ", c)
+
+
+def solve():
+    global rX, rY
+    c = list(prolog.query(f"solve([{rX}, {rY}], Sol)"))
+    print("\nPath: ", c)
 # -----------------------------------------------
 
 # DRIVER FUNCTIONS
@@ -869,7 +875,7 @@ Pick an action for the agent:
 5) Shoot
 6) Let the agent explore!
 ''')
-
+        solve()
         # UNCOMMENT FOR AUTOMATED PATHFINDING
         if(explore_flag):
             if len(moves) == 0:
@@ -902,13 +908,13 @@ Pick an action for the agent:
                 print("Agent thinks it should do: ", get_move())
             except:
                 print("Agent doesn't know what to do...")
-
+            
             choice = int(input("Choice: "))    
         
         # time.sleep(1) 
         
-        
-
+        print("Agent thinks it should do: ", get_move())
+       
         
         if choice == 1:
             print("Attempting to move forward...")
