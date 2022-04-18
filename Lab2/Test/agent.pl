@@ -151,7 +151,7 @@ shoot :-
         (CurDir == reast, NewX is X+1, NewY is Y);
         (CurDir == rwest, NewX is X-1, NewY is Y)
     ),
-    \+portal(NewX, NewY), \+safe(NewX, NewY), assert(safe(NewX, NewY)).
+    retract(wumpus(NewX, NewY)), assert(confirm_not_wumpus(NewX, NewY)), \+portal(NewX, NewY), \+safe(NewX, NewY), assert(safe(NewX, NewY)).
     
 
 % Turn left
