@@ -179,6 +179,14 @@ def explore():
 def reposition(L):
     list(prolog.query(f"reposition({L})"))
 
+def confirm_wumpus():
+    c = bool(list(prolog.query("wumpus_found")))
+    print("WUMPUS FOUND: ", c)
+    c = list(prolog.query("wumpus(X, Y)"))
+    print("WUMPUS at: ", c)
+    
+    c = list(prolog.query("confirm_wumpus(X, Y)"))
+    print("CONFIRM WUMPUS: ",c)
 
 # ACTIONS TESTING - Not actually used for calling
 def localisation():
@@ -997,7 +1005,7 @@ Pick an action for the agent:
             print_senses()
             print_Absolute_Map()
             print_Relative_Map()
-            
+            # confirm_wumpus()
         
 
 def world_reposition():

@@ -28,7 +28,9 @@ confirm_not_wumpus/2,
 confirm_not_portal/2,
 explore/1,
 % Updated as at 15/4/2021
-numcoins/1.
+numcoins/1,
+
+confirm_wumpus/2.
 
 
 
@@ -203,11 +205,12 @@ percept([_, S, T, G, _, Sc]) :-
     % Glitter?
     (G == on, (\+glitter(X, Y),assert(glitter(X, Y))));
     % Scream?
-    (Sc == on, assert(wumpus_dead(true)), retract(wumpus_dead(false)))
+    (Sc == on, assert(wumpus_dead(true)), retract(wumpus_dead(false)), update_safe, retractall(wumpus(_,_)))
     ).
 
     
-
+update_safe :-
+    wumpus(X, Y), \+portal(X, Y), \+safe(X,Y), assert(safe(X, Y)).
 
 percept([C|_]) :-
     % Confundus?
@@ -253,19 +256,32 @@ percept([_, S|_]) :-
             ), add_new_safe
         ).
 
+wumpus_found :-
+    confirm_wumpus(X, Y).
 
+% wumpus(X, Y) :-
+%     confirm_wumpus(X, Y).
 
 
 percept([_, S|_]) :-
-    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1,
+    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wumpus_found,
     (
-        S == on, 
-        (           
-            (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus_dead, \+wumpus(X, UpY), assert(wumpus(X, UpY)));
-            (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus_dead, \+wumpus(X, DownY), assert(wumpus(X, DownY)));
-            (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y),\+wumpus_dead, \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
-            (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus_dead, \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
-        )
+        S == on,
+        (
+            % (
+            %     wumpus(X, UpY) -> (assert(confirm_wumpus(X, UpY)), retractall(wumpus(_, _)));
+            %     wumpus(X, DownY) -> (assert(confirm_wumpus(X, DownY)), retractall(wumpus(_, _)) );
+            %     wumpus(UpX, Y) -> ( assert(confirm_wumpus(UpX, Y)), retractall(wumpus(_, _)) );
+            %     wumpus(DownX, Y) -> (assert(confirm_wumpus(DownX, Y)), retractall(wumpus(_, _)))          
+            % );
+            (           
+                (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus_dead, \+wumpus(X, UpY), assert(wumpus(X, UpY)));
+                (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus_dead, \+wumpus(X, DownY), assert(wumpus(X, DownY)));
+                (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y),\+wumpus_dead, \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+                (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus_dead, \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
+            )
+
+        ) 
     ).
 
 
