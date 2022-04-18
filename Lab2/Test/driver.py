@@ -290,8 +290,8 @@ def spawn_spots():
 # Spawn - Currently has a default spawn location
 def random_spawn():
     global spawnX, spawnY, absX, absY
-    (spawnY, spawnX) = random.choice(spawn_spots())
-    # spawnY, spawnX = 4, 1
+    # (spawnY, spawnX) = random.choice(spawn_spots())
+    spawnY, spawnX = 1,2
     absY, absX = spawnY, spawnX
     
 # random Direction
@@ -920,7 +920,7 @@ Pick an action for the agent:
             
             choice = int(input("Choice: "))    
         
-        # time.sleep(1) 
+        time.sleep(0.5) 
         
         # print("Agent thinks it should do: ", get_move())
        

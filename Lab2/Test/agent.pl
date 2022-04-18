@@ -297,7 +297,7 @@ percept([_, S, T|_]) :-
 
 
 validate_wumpus(X, Y) :-
-    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, retractall(more_likely_wumpus(X, Y)),
+    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, retractall(more_likely_wumpus(_, _)),
     (
         (wumpus(X, UpY) -> assert(more_likely_wumpus(X, UpY)));
         (wumpus(X, DownY) -> assert(more_likely_wumpus(X, DownY)));
@@ -306,7 +306,7 @@ validate_wumpus(X, Y) :-
     ), remove_wumpus.
 
 remove_wumpus :-
-    (wumpus(X, Y), \+more_likely_wumpus(X, Y)) -> retract(wumpus(X, Y)).
+    (wumpus(X, Y), \+more_likely_wumpus(X, Y)) -> retract(wumpus(X, Y)), (\+portal(X, Y)->assert(safe(X,Y))).
 
 
 percept([_, _, T|_]) :-
@@ -610,8 +610,9 @@ adjacent_wumpus(X, Y) :-
     ).
 
 
+
 goal([X, Y]) :-
-    safe_unvisited_cell(X, Y).
+    safe_unvisited_cell(X, Y); glitter(X,Y).
 
 safe_unvisited_cell(X, Y) :-
     safe(X, Y), \+visited(X, Y), \+wall(X, Y).
