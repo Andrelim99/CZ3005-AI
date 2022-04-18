@@ -14,8 +14,8 @@ MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
        ['#', 'P', '', '', 'P', '#'],      #1
        ['#', 'C', 'W', 'C', '', '#'],    #2
-       ['#', '', '', '', 'P', '#'],    #3
-       ['#', '', '', '#', '', '#'],      #4
+       ['#', '', '', '', '', '#'],    #3
+       ['#', '', '', '', '', '#'],      #4
        ['#', '', '', 'C', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
@@ -1004,7 +1004,7 @@ Pick an action for the agent:
             print("Senses after action: ", end='')            
             print_senses()
             print_Absolute_Map()
-            print_Relative_Map()
+            # print_Relative_Map()
             # confirm_wumpus()
         
 

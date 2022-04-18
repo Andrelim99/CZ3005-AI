@@ -30,7 +30,9 @@ explore/1,
 % Updated as at 15/4/2021
 numcoins/1,
 
-confirm_wumpus/2.
+confirm_wumpus/2,
+first_stench/1,
+more_likely_wumpus/2.
 
 
 
@@ -53,6 +55,8 @@ reborn:-
     retractall(numcoins(_)),
     retractall(confirm_not_wumpus(_, _)),
     retractall(confirm_not_portal(_, _)),
+    retractall(first_stench(_)),
+    retractall(more_likely_wumpus(_,_)),
                
     % Not to be reset in reposition-----
     assert(has_coin(false)),
@@ -61,7 +65,7 @@ reborn:-
     assert(wumpus_dead(false)),    
     % ----------------------------------
     
-
+    assert(first_stench(true)),
     assert(safe(0,0)),
     assert(visited(0,0)),
     assert(direction(rnorth)),
@@ -85,10 +89,13 @@ reposition(L):-
     retractall(relative_position(_, _)),
     retractall(wall(_, _)),
     % retractall(numcoins(_)),
+    retractall(first_stench(_)),
+    retractall(more_likely_wumpus(_,_)),
 
     retractall(confirm_not_wumpus(_, _)),
     retractall(confirm_not_portal(_, _)),
 
+    assert(first_stench(true)),
     assert(safe(0,0)),
     assert(visited(0,0)),
     assert(direction(rnorth)),
@@ -263,26 +270,43 @@ wumpus_found :-
 %     confirm_wumpus(X, Y).
 
 
-percept([_, S|_]) :-
-    current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, \+wumpus_found,
+percept([_, S, T|_]) :-
+    (\+wumpus_dead, current(X, Y, CurDir),  UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, S == on),
     (
-        S == on,
         (
-            % (
-            %     wumpus(X, UpY) -> (assert(confirm_wumpus(X, UpY)), retractall(wumpus(_, _)));
-            %     wumpus(X, DownY) -> (assert(confirm_wumpus(X, DownY)), retractall(wumpus(_, _)) );
-            %     wumpus(UpX, Y) -> ( assert(confirm_wumpus(UpX, Y)), retractall(wumpus(_, _)) );
-            %     wumpus(DownX, Y) -> (assert(confirm_wumpus(DownX, Y)), retractall(wumpus(_, _)))          
-            % );
-            (           
-                (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY), \+wumpus_dead, \+wumpus(X, UpY), assert(wumpus(X, UpY)));
-                (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus_dead, \+wumpus(X, DownY), assert(wumpus(X, DownY)));
-                (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y),\+wumpus_dead, \+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
-                (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus_dead, \+wumpus(DownX, Y), assert(wumpus(DownX, Y))) 
-            )
-
-        ) 
+            first_stench(true),
+            (
+                (\+wall(X, UpY), \+safe(X, UpY), \+confirm_not_wumpus(X, UpY),\+wumpus(X, UpY), assert(wumpus(X, UpY)));
+                (\+wall(X, DownY), \+safe(X, DownY), \+confirm_not_wumpus(X, DownY), \+wumpus(X, DownY), assert(wumpus(X, DownY)));
+                (\+wall(UpX, Y), \+safe(UpX, Y), \+confirm_not_wumpus(UpX, Y),\+wumpus(UpX, Y), assert(wumpus(UpX, Y)));
+                (\+wall(DownX, Y), \+safe(DownX, Y), \+confirm_not_wumpus(DownX, Y), \+wumpus(DownX, Y), assert(wumpus(DownX, Y)))
+            ), retract(first_stench(true))
+        );
+        (
+            (
+                T == off,
+                (
+                    (\+wumpus(X, UpY), \+portal(X, UpY), \+wall(X, UpY), \+safe(X, UpY), assert(safe(X, UpY)));
+                    (\+wumpus(X, DownY), \+portal(X, DownY), \+wall(X, DownY), \+safe(X, DownY), assert(safe(X, DownY)));
+                    (\+wumpus(UpX, Y), \+portal(UpX, Y), \+wall(UpX, Y), \+safe(UpX, Y), assert(safe(UpX, Y)));
+                    (\+wumpus(DownX, Y), \+portal(DownX, Y), \+wall(DownX, Y), \+safe(DownX, Y), assert(safe(DownX, Y)))            
+                )
+            ), validate_wumpus(X, Y)
+        )   
     ).
+
+
+validate_wumpus(X, Y) :-
+    UpY is Y+1, DownY is Y-1, UpX is X+1, DownX is X-1, retractall(more_likely_wumpus(X, Y)),
+    (
+        (wumpus(X, UpY) -> assert(more_likely_wumpus(X, UpY)));
+        (wumpus(X, DownY) -> assert(more_likely_wumpus(X, DownY)));
+        (wumpus(UpX, Y) -> assert(more_likely_wumpus(UpX, Y)));
+        (wumpus(DownX, Y) -> assert(more_likely_wumpus(DownX, Y)))
+    ), remove_wumpus.
+
+remove_wumpus :-
+    (wumpus(X, Y), \+more_likely_wumpus(X, Y)) -> retract(wumpus(X, Y)).
 
 
 percept([_, _, T|_]) :-
@@ -406,8 +430,12 @@ adjacent_unvisited_safe_cell :-
         (safe(DownX, Y), \+visited(DownX, Y))
     ).
 
+% explore([shoot]) :-
+%     \+explore([pickup]), \+adjacent_unvisited_safe_cell, hasarrow, 
+%     adjacent_wumpus.
+
 explore([shoot]) :-
-    \+explore([pickup]), \+adjacent_unvisited_safe_cell, hasarrow, 
+    \+explore([pickup]), no_safe_unvisited_spots, facing_wumpus, hasarrow, 
     adjacent_wumpus.
 
 adjacent_wumpus :-
@@ -419,6 +447,18 @@ adjacent_wumpus :-
         (CurDir == rwest, NewX is X-1, NewY is Y)
     ),
     wumpus(NewX, NewY).
+
+facing_wumpus :-
+    current(CurX, CurY, CurDir), wumpus(X, Y),
+    (
+        (CurX == X, CurY > Y, CurDir == rsouth);
+        (CurX == X, CurY < Y, CurDir == rnorth);
+        (CurY == Y, CurX > X, CurDir == rwest);
+        (CurY == Y, CurX < X, CurDir == reast)
+    ).
+
+explore([turnleft]) :-
+    \+explore([pickup]), no_safe_unvisited_spots, hasarrow, adjacent_wumpus, \+facing_wumpus.
 
 
 % BACKTRACKING... UNFINISHED
@@ -555,7 +595,20 @@ adjacent_goal([X, Y], [A, B]) :-
     
 
 goal([0, 0]) :-
-    no_safe_unvisited_spots.
+    no_safe_unvisited_spots, \+hasarrow.
+
+goal([X, Y]) :-
+    no_safe_unvisited_spots, hasarrow, visited(X, Y), adjacent_wumpus(X, Y).
+
+adjacent_wumpus(X, Y) :-
+    UpX is X+1, DownX is X-1, UpY is Y+1, DownY is Y-1,
+    (
+        wumpus(UpX, Y);
+        wumpus(DownX, Y);
+        wumpus(X, UpY);
+        wumpus(X, DownY)
+    ).
+
 
 goal([X, Y]) :-
     safe_unvisited_cell(X, Y).
