@@ -12,11 +12,11 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 # Map - Row by Column (7 x 6)
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
-       ['#', 'P', '', '', 'P', '#'],      #1
+       ['#', 'P', '', '', '', '#'],      #1
        ['#', 'C', 'W', 'C', '', '#'],    #2
        ['#', '', '', '', '', '#'],    #3
        ['#', '', '', '', '', '#'],      #4
-       ['#', '', '', 'C', 'P', '#'],     #5
+       ['#', 'P', '', 'C', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 
@@ -179,15 +179,6 @@ def explore():
 def reposition(L):
     list(prolog.query(f"reposition({L})"))
 
-def confirm_wumpus():
-    c = bool(list(prolog.query("wumpus_found")))
-    print("WUMPUS FOUND: ", c)
-    c = list(prolog.query("wumpus(X, Y)"))
-    print("WUMPUS at: ", c)
-    
-    c = list(prolog.query("confirm_wumpus(X, Y)"))
-    print("CONFIRM WUMPUS: ",c)
-
 # ACTIONS TESTING - Not actually used for calling
 def localisation():
     global stench_pos, tingle_pos, glitter_pos, wumpus_pos, portal_pos, wall_pos, safe_pos, visited_pos
@@ -290,8 +281,8 @@ def spawn_spots():
 # Spawn - Currently has a default spawn location
 def random_spawn():
     global spawnX, spawnY, absX, absY
-    # (spawnY, spawnX) = random.choice(spawn_spots())
-    spawnY, spawnX = 1,2
+    (spawnY, spawnX) = random.choice(spawn_spots())
+    # spawnY, spawnX = 1,2
     absY, absX = spawnY, spawnX
     
 # random Direction
@@ -920,7 +911,7 @@ Pick an action for the agent:
             
             choice = int(input("Choice: "))    
         
-        time.sleep(0.5) 
+        # time.sleep(0.5) 
         
         # print("Agent thinks it should do: ", get_move())
        
@@ -1004,8 +995,8 @@ Pick an action for the agent:
             print("Senses after action: ", end='')            
             print_senses()
             print_Absolute_Map()
-            # print_Relative_Map()
-            # confirm_wumpus()
+            print_Relative_Map()
+
         
 
 def world_reposition():
