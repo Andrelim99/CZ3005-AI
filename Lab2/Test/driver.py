@@ -920,12 +920,8 @@ Pick an action for the agent:
             print("Attempting to move forward...")
             # Check if forward is wall
             get_next_senses()            
-
-            # print(bool(list(prolog.query(f"moveforward({senses})"))))
             move('moveforward', senses)
-            move("turnright", senses)
-            move("turnleft", senses)
-            # update_current_senses()
+
 
         elif choice == 2:
             # turn_left()  
