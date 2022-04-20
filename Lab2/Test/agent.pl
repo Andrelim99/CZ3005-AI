@@ -186,7 +186,7 @@ turnright :-
 % Move reasoning?
 % Forward
 move(A, L) :-
-    A == moveforward, moveforward(L), percept(L).
+    A == moveforward, (moveforward(L);true), percept(L).
 
 % Pickup
 move(A, L) :-
