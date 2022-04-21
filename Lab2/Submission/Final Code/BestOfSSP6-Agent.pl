@@ -121,7 +121,10 @@ moveforward([_, _, _, _, B, _]) :-
         % Go Relative Left
         ((CurDir == rwest, NewX is CurX - 1) -> assert(relative_position(NewX, CurY)))
     ),
-    relative_position(X, Y),(\+visited(X, Y), assert(visited(X, Y))), (\+safe(X, Y), assert(safe(X, Y))), retract_portal_wumpus(X, Y).
+    relative_position(X, Y),
+    (\+visited(X, Y), assert(visited(X, Y))),
+    (\+safe(X, Y), assert(safe(X, Y))),
+    retract_portal_wumpus(X, Y).
 
 % If Bump -> Wall
 moveforward([_, _, _, _, B|_]) :-
@@ -186,7 +189,7 @@ turnright :-
 % Move reasoning?
 % Forward
 move(A, L) :-
-    A == moveforward, moveforward(L), percept(L).
+    A == moveforward, (moveforward(L); true), percept(L).
 
 % Pickup
 move(A, L) :-

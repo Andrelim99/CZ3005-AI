@@ -3,7 +3,7 @@ import random
 from pyswip import Prolog
 
 prolog = Prolog()
-prolog.consult("agent.pl")
+prolog.consult("BestOfSSP6-Agent.pl")
 
 NUMROW = 7
 NUMCOL = 6
@@ -19,6 +19,13 @@ MAP = [  #0   1    2    3    4    5
        ['#', 'P', '', 'C', 'P', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
+# MAP = [['#', '#', '#', '#', '#', '#'],
+#             ['#', '', 'C', '', '', '#'],
+#             ['#', '', 'W', '', 'C', '#'],
+#             ['#', 'P', '', 'P', '', '#'],
+#             ['#', '', '', '#', '', '#'],
+#             ['#', 'P', '', '', 'C', '#'],
+#             ['#', '#', '#', '#', '#', '#']]
 
 # Create 7 x 6 x 9 [] * 7 
 absMap = [ [ ['.', '.', '.', ' ', '?', ' ', '.', '.', '.'] for b in range(NUMCOL)] for a in range(NUMROW) ]
@@ -304,7 +311,7 @@ def random_direction():
         else:
             yOffset = 1
 
-# Symbol Populater for default map - made my own modificati ons
+# Symbol Populater for default map - made my own modifications
 def populate_helper(absMap, rIndex, cIndex, col):
     global actual_wumpus, actual_portals, actual_coin
     newRight = cIndex + 1
