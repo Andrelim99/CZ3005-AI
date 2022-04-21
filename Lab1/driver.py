@@ -1,4 +1,4 @@
-import time
+
 import random
 from pyswip import Prolog
 
@@ -12,11 +12,11 @@ DIRECTIONS = ['n', 'e', 's', 'w'] # DO NOT CHANGE DIRECTION ORDER
 # Map - Row by Column (7 x 6)
 MAP = [  #0   1    2    3    4    5
        ['#', '#', '#', '#', '#', '#'],  #0
-       ['#', 'P', '', '', '', '#'],      #1
-       ['#', 'C', 'W', 'C', '', '#'],    #2
-       ['#', '', '', '', '', '#'],    #3
+       ['#', '', '', '', '', '#'],      #1
+       ['#', '', 'P', '', '', '#'],    #2
+       ['#', '', '#', 'W', 'C', '#'],    #3
        ['#', '', '', '', '', '#'],      #4
-       ['#', 'P', '', 'C', 'P', '#'],     #5
+       ['#', '', 'P', '', '', '#'],     #5
        ['#', '#', '#', '#', '#', '#']]  #6
 
 
@@ -147,10 +147,6 @@ def confirm_not_wumpus_at():
 def confirm_not_portal_at():
     return list(prolog.query(f"confirm_not_portal(X, Y)"))
 
-def numcoins():
-    c = list(prolog.query("numcoins(N)"))
-    n = c[0]['N']
-    return n
 
 def hasarrow():
     c = bool(list(prolog.query("hasarrow")))
@@ -173,11 +169,11 @@ def move(A, L):
     list(prolog.query(f"move({A}, {L})"))
 
 def explore():
-    # print("MOVES: ", list(prolog.query("explore(L)")))
     return list(prolog.query("explore(L)"))
 
 def reposition(L):
     list(prolog.query(f"reposition({L})"))
+
 
 # ACTIONS TESTING - Not actually used for calling
 def localisation():
@@ -258,12 +254,6 @@ def visited():
 def safe():
     c = list(prolog.query("safe(X, Y)"))
     print("\nSafe Cells: ", c)
-
-
-def solve():
-    global rX, rY
-    c = list(prolog.query(f"solve([{rX}, {rY}], Action, Sol)"))
-    print("\nPath: ", c)
 # -----------------------------------------------
 
 # DRIVER FUNCTIONS
@@ -281,8 +271,8 @@ def spawn_spots():
 # Spawn - Currently has a default spawn location
 def random_spawn():
     global spawnX, spawnY, absX, absY
-    (spawnY, spawnX) = random.choice(spawn_spots())
-    # spawnY, spawnX = 1,2
+    # (spawnY, spawnX) = random.choice(spawn_spots())
+    spawnY, spawnX = 1, 4
     absY, absX = spawnY, spawnX
     
 # random Direction
@@ -304,7 +294,7 @@ def random_direction():
         else:
             yOffset = 1
 
-# Symbol Populater for default map - made my own modificati ons
+# Symbol Populater for default map - made my own modifications
 def populate_helper(absMap, rIndex, cIndex, col):
     global actual_wumpus, actual_portals, actual_coin
     newRight = cIndex + 1
@@ -351,12 +341,12 @@ def populate_helper(absMap, rIndex, cIndex, col):
 
     elif col == "C":
         actual_coin.add((rIndex, cIndex))
-        # if not has_coin(): 
+        if not has_coin(): 
             # print('\nPlacing Coin..')
             # for i in range(9):
-        absMap[rIndex][cIndex][6] = '*'       
-        # else:
-            # absMap[rIndex][cIndex][6] = '.'
+            absMap[rIndex][cIndex][6] = '*'       
+        else:
+            absMap[rIndex][cIndex][6] = '.'
 
 
     # Scream
@@ -376,7 +366,7 @@ def create_abs_map():
 
 def print__map():
     global absMap
-    print("\n"+'#'*16 + " WORLD MAP " + '#'*16 +"\n")
+    print("\n"+'#'*16 + " ACTUAL MAP " + '#'*16 +"\n")
     for z in range(7):
         for j in range(3):
             for col in absMap[z]:
@@ -410,12 +400,12 @@ def set_abs_agent_location():
         if(el == 'on'):
             if(i == 0):
                 agent_abs_map[absY][absX][0] = '%'
-            # elif(i == 1):
-            #     agent_abs_map[absY][absX][1] = '='
-            # elif(i == 2):
-            #     agent_abs_map[absY][absX][2] = 'T'
-            # elif(i == 3):
-            #     agent_abs_map[absY][absX][6] = '*'
+            elif(i == 1):
+                agent_abs_map[absY][absX][1] = '='
+            elif(i == 2):
+                agent_abs_map[absY][absX][2] = 'T'
+            elif(i == 3):
+                agent_abs_map[absY][absX][6] = '*'
             elif(i == 4):
                 agent_abs_map[absY][absX][7] = 'B'
             elif(i == 5):
@@ -451,9 +441,11 @@ def update_absolute_agent_map():
         agent_abs_map[y][x][6] = '*'
 
     for (y, x) in stench_pos:
+        # if not has_coin():
         agent_abs_map[y][x][1] = '='
     
     for (y, x) in tingle_pos:
+        # if not has_coin():
         agent_abs_map[y][x][2] = 'T'
 
         
@@ -533,12 +525,12 @@ def set_relative_agent_location():
         if(el == 'on'):
             if(i == 0):
                 agent_relative_map[y][x][0] = '%'
-            # elif(i == 1):
-            #     agent_relative_map[y][x][1] = '='
-            # elif(i == 2):
-            #     agent_relative_map[y][x][2] = 'T'
-            # elif(i == 3):
-            #     agent_relative_map[y][x][6] = '*'
+            elif(i == 1):
+                agent_relative_map[y][x][1] = '='
+            elif(i == 2):
+                agent_relative_map[y][x][2] = 'T'
+            elif(i == 3):
+                agent_relative_map[y][x][6] = '*'
             elif(i == 4):
                 agent_relative_map[y][x][7] = 'B'
             elif(i == 5):
@@ -581,10 +573,12 @@ def update_relative_agent_map():
         agent_relative_map[y][x][6] = '*'
 
     for (y, x) in r_stench_pos:
+        # if not has_coin():
         y, x = calculate_r_postion(y, x)
         agent_relative_map[y][x][1] = '='
     
     for (y, x) in r_tingle_pos:
+        # if not has_coin():
         y, x = calculate_r_postion(y, x)
         agent_relative_map[y][x][2] = 'T'
     
@@ -652,7 +646,7 @@ def redefine_abs_coord():
     absY, absX = get_abs_coord((rY, rX))
     
 def update_current_senses():
-    global senses, absMap, absX, absY, first_start, actual_coin
+    global senses, absMap, absX, absY, first_start
     senses = ["off", "off", "off", "off", "off", "off"] 
     # Confounded??
     if(first_start == 0):
@@ -664,7 +658,7 @@ def update_current_senses():
     if(absMap[absY][absX][2] == 'T'):
         senses[2] = 'on'
     # Turn on glitter
-    if(absMap[absY][absX][6] == '*' and (absY, absX) in actual_coin):
+    if(absMap[absY][absX][6] == '*'):
         senses[3] = 'on'
 
 
@@ -687,8 +681,7 @@ def get_next_senses():
     if(absMap[newY][newX][2] == 'T'):
         senses[2] = 'on'
     # Turn on glitter
-    
-    if(absMap[newY][newX][6] == '*' and (newY, newX) in actual_coin):
+    if(absMap[newY][newX][6] == '*'):
         senses[3] = 'on'
 
 
@@ -721,20 +714,13 @@ def facing_wumpus():
 
 # Function to check if wumpus got killed after shooting
 def check_if_wumpus_killed():
-    global senses, actual_wumpus
+    global senses
     if facing_wumpus():
         senses[5] = 'on'
         print("Wumpus has been slain!")
-        actual_wumpus = set()
 
 # ----------------------------
 
-def get_move():
-    c = explore()
-    # print(c)
-    # print("GOALS: ", list(prolog.query("goal(G)")))
- 
-    return c[0]['L']
 
 
 # Update driver's knowledge of Agent's knowledge.. lmao
@@ -863,11 +849,10 @@ def update_all():
 
 
 def controls():
-    global absDir, rX, rY, rDir, senses, actual_coin, actual_wumpus
-    moves = []
+    global absDir, rX, rY, rDir, senses
+
     choice = 1
-    explore_flag = False
-    while choice != -1:
+    while choice != 6:
         # print(f"Relative Y: {rY} Relative X: {rX} Relative Dir: {rDir}")
         print('''
 Pick an action for the agent:
@@ -876,52 +861,19 @@ Pick an action for the agent:
 3) Turn Right
 4) Pick Up Coin
 5) Shoot
-6) Let the agent explore!
 ''')
-        if(explore_flag):
-            if len(moves) == 0:
-                moves = get_move()
-                print("Next Move: ", moves)
-
-                    
-            try:
-                mov = moves.pop(0)
-                if mov == 'moveforward':
-                    choice = 1
-                elif mov == 'turnleft':
-                    choice = 2
-                elif mov == 'turnright':
-                    choice = 3
-                elif mov == 'pickup':
-                    choice = 4
-                elif mov == 'shoot':
-                    choice = 5
-                
-            except:
-                explore_flag = False                    
-                print("Agent has returned to origin, all safe cells explored!")
-                choice = int(input("Choice: "))
-                
-            
-        else:
-            try:
-                print("Agent thinks it should do: ", get_move())
-            except:
-                print("Agent doesn't know what to do or has returned to origin...")
-            
-            choice = int(input("Choice: "))    
-        
-        # time.sleep(0.5) 
-        
-        # print("Agent thinks it should do: ", get_move())
-       
-        
+        print("EXPLORE: ", explore())
+        choice = int(input("Choice: "))
         if choice == 1:
             print("Attempting to move forward...")
             # Check if forward is wall
             get_next_senses()            
-            move('moveforward', senses)
 
+            # print(bool(list(prolog.query(f"moveforward({senses})"))))
+            move('moveforward', senses)
+            move("turnright", senses)
+            move("turnleft", senses)
+            # update_current_senses()
 
         elif choice == 2:
             # turn_left()  
@@ -941,11 +893,7 @@ Pick an action for the agent:
             update_current_senses()
             print("Attempting to pick up coin...")
             move("pickup", senses)
-            # create_abs_map()
-            try:
-                actual_coin.remove((absY, absX))
-            except:
-                pass
+            create_abs_map()
             update_current_senses()
                 
             
@@ -963,18 +911,13 @@ Pick an action for the agent:
                 # print("WUMPUS DEAD: ", wumpus_dead())
             else:
                 print("No arrows to shoot")
-
-        elif choice == 6:
-            explore_flag = True
-            print("Agent shall begin Exploring...")
-
         else:
             "Invalid Option!"
             continue
 
         update_all()
         # Check if entered wumpus cell
-        if  (absY, absX) in actual_wumpus:
+        if  (absY, absX) in actual_wumpus and not wumpus_dead():
             print("Oops... Agent has been devoured! Game Over!")
             break
 
@@ -986,13 +929,11 @@ Pick an action for the agent:
         # Else
         else:        
             # print__map()
-            print("Has arrow: ", hasarrow())
-            # print("Number of coins: ", numcoins())
-            print("Senses after action: ", end='')            
+            print("Senses after action: ", end='')
             print_senses()
             print_Absolute_Map()
             print_Relative_Map()
-
+            
         
 
 def world_reposition():
